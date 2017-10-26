@@ -8,6 +8,7 @@ env:
 
 before_install:
   - go get github.com/golang/dep/cmd/dep
+  - go get github.com/mattn/goveralls
   - git clone https://github.com/alecthomas/gometalinter.git ${GOPATH}/src/github.com/alecthomas/gometalinter
   - cd ${GOPATH}/src/github.com/alecthomas/gometalinter
   - git reset --hard ${GOMETALINTER_VERSION}
@@ -21,4 +22,8 @@ install:
 
 script:
   - gometalinter --vendor ./...
-  - go test --cover ./...
+  - go test -race -covermode=atomic -coverprofile=coverage.txt
+  - goveralls -covermode=atomic -coverprofile=coverage.txt
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
