@@ -1,0 +1,14 @@
+version: '3.2'
+
+services:
+  test:
+    image: warp-pipe/test:latest
+    volumes:
+      - type: bind
+        source: .
+        target: /go/src/github.com/pagarme/warp-pipe
+      - type: bind
+        source: ${GOPATH}/pkg/linux_amd64
+        target: /go/pkg/linux_amd64
+    working_dir: /go/src/github.com/pagarme/warp-pipe
+    command: go test -v
