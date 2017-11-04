@@ -18,7 +18,7 @@ services:
     image: warp-pipe/postgres-client:9.5-stretch-slim
     command: tail -f /dev/null
     depends_on:
-      - postgres-server 
+      - postgres-server
     environment:
       PGHOST: postgres-server
       PGPASSWORD: moses
