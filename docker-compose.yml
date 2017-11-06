@@ -2,7 +2,7 @@ version: '3.2'
 
 services:
   test:
-    image: warp-pipe/test:latest
+    image: warp-pipe/golang:1.9.2-stretch
     volumes:
       - type: bind
         source: .
@@ -11,4 +11,4 @@ services:
         source: ${GOPATH}/pkg/linux_amd64
         target: /go/pkg/linux_amd64
     working_dir: /go/src/github.com/pagarme/warp-pipe
-    command: go test -v
+    command: go test -v ./...
