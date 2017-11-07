@@ -3,7 +3,9 @@ version: '3'
 services:
   golang:
     image: warp-pipe/golang:1.9.2-stretch
-    build: golang:1.9.2-stretch
+    build:
+      dockerfile: docker/base-images/golang:1.9.2-stretch/Dockerfile
+      context: ../..
   postgres-client:
     image: warp-pipe/postgres-client:9.5-stretch-slim
     build: postgres-client:9.5-stretch-slim
