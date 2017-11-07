@@ -1,7 +1,7 @@
 language: go
 
 go:
-  - 1.9
+  - 1.9.2
 
 env:
   - GOMETALINTER_VERSION=0960299513738ff031fe418b3fcd4f6badc1a095
