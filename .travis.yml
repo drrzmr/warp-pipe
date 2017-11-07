@@ -5,11 +5,11 @@ go:
 
 install:
   - ./scripts/install-dependencies.sh
-  - dep ensure
+  - make dep
 
 script:
-  - gometalinter --vendor ./...
-  - go test -race -covermode=atomic -coverprofile=coverage.txt
-  - goveralls -covermode=atomic -coverprofile=coverage.txt
+  - make linter
+  - make test
 
 after_success:
+  - goveralls -v -race -covermode=atomic -service=travis-ci
