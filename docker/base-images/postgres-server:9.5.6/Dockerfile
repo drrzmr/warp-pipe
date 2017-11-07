@@ -22,4 +22,4 @@ RUN set -eux; \
 		/var/lib/apt/lists/* \
 		/tmp/*
 
-COPY *.sh *.sql /docker-entrypoint-initdb.d/
+COPY docker/base-images/postgres-server:9.5.6/update-config.sh /docker-entrypoint-initdb.d/
