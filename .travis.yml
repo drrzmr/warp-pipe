@@ -1,29 +1,15 @@
 language: go
 
 go:
-  - 1.9
-
-env:
-  - GOMETALINTER_VERSION=0960299513738ff031fe418b3fcd4f6badc1a095
-
-before_install:
-  - go get github.com/golang/dep/cmd/dep
-  - go get github.com/mattn/goveralls
-  - git clone https://github.com/alecthomas/gometalinter.git ${GOPATH}/src/github.com/alecthomas/gometalinter
-  - cd ${GOPATH}/src/github.com/alecthomas/gometalinter
-  - git reset --hard ${GOMETALINTER_VERSION}
-  - cd ${GOPATH}
-  - go install github.com/alecthomas/gometalinter
-  - gometalinter --debug --install --vendored-linters
-  - cd $HOME/gopath/src/github.com/pagarme/warp-pipe
+  - 1.9.2
 
 install:
-  - dep ensure
+  - ./scripts/install-dependencies.sh
+  - make dep
 
 script:
-  - gometalinter --vendor ./...
-  - go test -race -covermode=atomic -coverprofile=coverage.txt
-  - goveralls -covermode=atomic -coverprofile=coverage.txt
+  - make linter
+  - make test
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - goveralls -v -race -covermode=atomic -service=travis-ci
