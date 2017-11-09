@@ -1,8 +1,12 @@
 version: '3.2'
 
 services:
-  test:
+  golang:
     image: warp-pipe/golang:1.9.2-stretch
+    container_name: wp-golang
+    hostname: golang
+    networks:
+      - default
     volumes:
       - type: bind
         source: .
@@ -11,4 +15,7 @@ services:
         source: ${GOPATH}/pkg/linux_amd64
         target: /go/pkg/linux_amd64
     working_dir: /go/src/github.com/pagarme/warp-pipe
-    command: go test -v ./...
+    command: tail -f /dev/null
+
+networks:
+  default:
