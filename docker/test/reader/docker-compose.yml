@@ -1,0 +1,38 @@
+version: '3.0'
+
+services:
+  postgres-server:
+    container_name: postgres-server
+    hostname: postgres-server
+    image: warp-pipe/postgres-server:9.5.6
+    environment:
+      POSTGRES_PASSWORD: moses
+    networks:
+      - default
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  golang:
+    container_name: golang
+    hostname: golang
+    image: warp-pipe/golang:1.9.2-stretch
+    command: tail -f /dev/null
+    depends_on:
+      - postgres-server
+    environment:
+      PGHOST: postgres-server
+      PGPASSWORD: moses
+      PGUSER: postgres
+    networks:
+      - default
+    volumes:
+      - ../../../scripts:/scripts
+      - ../../..:/go/src/github.com/pagarme/warp-pipe
+      - ${GOPATH}/pkg/linux_amd64:/go/pkg/linux_amd64
+    working_dir: /go/src/github.com/pagarme/warp-pipe 
+
+volumes:
+  pgdata:
+
+networks:
+  default:
