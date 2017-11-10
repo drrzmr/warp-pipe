@@ -1,5 +1,10 @@
 package config
 
+import (
+	"io"
+	"os"
+)
+
 // Defaults
 const (
 	// AppVersion app version
@@ -14,3 +19,24 @@ slots`
 	// ConfigFileType config filetype
 	ConfigFileType = "yaml"
 )
+
+// Reader config struct
+type Reader struct {
+	InputStream  io.Reader
+	OutputStream io.WriteCloser
+}
+
+// Config main struct
+type Config struct {
+	Reader
+}
+
+// New create a new Config struct
+func New() (conf *Config) {
+	return &Config{
+		Reader{
+			InputStream:  os.Stdin,
+			OutputStream: os.Stdout,
+		},
+	}
+}
