@@ -12,6 +12,8 @@ var root *cobra.Command
 
 func init() {
 
+	conf := config.New()
+
 	root = &cobra.Command{
 		Use:   config.AppName,
 		Short: config.AppShortDescription,
@@ -19,7 +21,7 @@ func init() {
 	}
 
 	root.AddCommand(version.New())
-	root.AddCommand(reader.New())
+	root.AddCommand(reader.New(&conf.Reader))
 }
 
 // Execute executes root command
