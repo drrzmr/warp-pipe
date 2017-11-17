@@ -16,3 +16,14 @@ services:
     build:
       dockerfile: docker/base-images/postgres-server:9.5.6/Dockerfile
       context: ../..
+  zookeeper:
+    image: warp-pipe/cp-zookeeper:3.3.1
+    build:
+      dockerfile: docker/base-images/cp-zookeeper:3.3.1/Dockerfile
+      context: ../..
+  kafka:
+    image: warp-pipe/cp-kafka:3.3.1
+    build:
+      dockerfile: docker/base-images/cp-kafka:3.3.1/Dockerfile
+      context: ../..
+
