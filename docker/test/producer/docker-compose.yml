@@ -1,0 +1,43 @@
+version: '3.0'
+
+services:
+  zookeeper:
+    container_name: zookeeper
+    hostname: zookeeper
+    image: warp-pipe/cp-zookeeper:3.3.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - default
+
+  kafka:
+    container_name: kafka
+    hostname: kafka
+    image: warp-pipe/cp-kafka:3.3.1
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - default
+
+  golang:
+    container_name: golang
+    hostname: golang
+    image: warp-pipe/golang:1.9.2-stretch
+    command: tail -f /dev/null
+    depends_on:
+      - kafka
+    networks:
+      - default
+    volumes:
+      - ../../..:/go/src/github.com/pagarme/warp-pipe
+      - ${GOPATH}/pkg/linux_amd64:/go/pkg/linux_amd64
+    working_dir: /go/src/github.com/pagarme/warp-pipe 
+
+networks:
+  default:
