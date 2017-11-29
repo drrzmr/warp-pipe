@@ -27,5 +27,6 @@
     "vetshadow"
   ],
   "Vendor": true,
+  "LineLength": 120,
   "Deadline": "2m"
 }
