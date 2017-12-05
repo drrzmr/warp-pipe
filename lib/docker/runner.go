@@ -75,6 +75,11 @@ func (runner *Runner) Stop() (err error) {
 		return errors.WithStack(err)
 	}
 
+	if err = runner.remove(); err != nil {
+		return errors.WithStack(err)
+	}
+
+	runner.client = nil
 	return nil
 }
 
@@ -199,6 +204,21 @@ func (runner *Runner) stop() (err error) {
 
 	err = runner.client.ContainerStop(runner.context, runner.containerID, nil)
 	return errors.Wrapf(err, "Could not stop docker container, image: %s, name: %s",
+		runner.config.ImageName(),
+		runner.config.ContainerName,
+	)
+}
+
+func (runner *Runner) remove() (err error) {
+
+	removeOptions := types.ContainerRemoveOptions{
+		Force:         false,
+		RemoveLinks:   false,
+		RemoveVolumes: true,
+	}
+
+	err = runner.client.ContainerRemove(runner.context, runner.containerID, removeOptions)
+	return errors.Wrapf(err, "Could not remove docker container, image: %s, name: %s",
 		runner.config.ImageName(),
 		runner.config.ContainerName,
 	)
