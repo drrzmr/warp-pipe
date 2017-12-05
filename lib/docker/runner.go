@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/pagarme/warp-pipe/lib/retry"
+	"github.com/pagarme/warp-pipe/lib/waitfor"
 )
 
 // Runner object
@@ -53,6 +54,10 @@ func (runner *Runner) Start() (err error) {
 	}
 
 	if err = runner.waitForRunning(); err != nil {
+		return errors.WithStack(err)
+	}
+
+	if err = runner.waitForTCPPorts(); err != nil {
 		return errors.WithStack(err)
 	}
 
@@ -149,6 +154,23 @@ func (runner *Runner) waitForRunning() (err error) {
 
 	if err != nil {
 		return errors.Wrapf(innerErr, "retry end by %s", err.Error())
+	}
+
+	return nil
+}
+
+func (runner *Runner) waitForTCPPorts() (err error) {
+
+	ipAddress := runner.json.NetworkSettings.IPAddress
+	for containerPort := range runner.json.NetworkSettings.Ports {
+		if containerPort.Proto() != "tcp" {
+			continue
+		}
+		port := uint16(containerPort.Int())
+
+		if err = waitfor.TCPPort(runner.config.WaitTimeout, ipAddress, port); err != nil {
+			return errors.WithStack(err)
+		}
 	}
 
 	return nil
