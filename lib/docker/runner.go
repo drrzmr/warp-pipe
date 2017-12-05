@@ -1,6 +1,9 @@
 package docker
 
-import "github.com/docker/docker/client"
+import (
+	"github.com/docker/docker/client"
+	"github.com/pkg/errors"
+)
 
 // Runner object
 type Runner struct {
@@ -27,10 +30,23 @@ func (runner *Runner) Start() (err error) {
 		return nil
 	}
 
+	if err = runner.newClient(); err != nil {
+		return errors.WithStack(err)
+	}
+
 	return nil
 }
 
 func (runner *Runner) isStarted() (started bool) {
 
 	return runner.client != nil
+}
+
+func (runner *Runner) newClient() (err error) {
+
+	runner.client, err = client.NewEnvClient()
+	return errors.Wrapf(err, "Could not create docker client, image: %s, name: %s",
+		runner.config.ImageName(),
+		runner.config.ContainerName,
+	)
 }
