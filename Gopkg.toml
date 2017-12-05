@@ -45,3 +45,7 @@
 [[override]]
   name = "github.com/docker/distribution"
   revision = "b38e5838b7b2f2ad48e06ec4b500011976080621"
+
+[[constraint]]
+  name = "github.com/jackc/pgx"
+  version = "3.0.1"
