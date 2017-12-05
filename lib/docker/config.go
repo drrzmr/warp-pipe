@@ -1,6 +1,15 @@
 package docker
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
+
+const (
+	minWaitTimeout = 10 * time.Second
+	// DefaultWaitTimeout default timeout
+	DefaultWaitTimeout = minWaitTimeout
+)
 
 // Config object
 type Config struct {
@@ -8,6 +17,7 @@ type Config struct {
 	URL           string
 	Tag           string
 	ContainerName string
+	WaitTimeout   time.Duration
 }
 
 // ImageName return image name from config

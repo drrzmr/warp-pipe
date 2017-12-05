@@ -7,6 +7,8 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
+
+	"github.com/pagarme/warp-pipe/lib/retry"
 )
 
 // Runner object
@@ -14,6 +16,7 @@ type Runner struct {
 	config      Config
 	context     context.Context
 	containerID string
+	json        *types.ContainerJSON
 	client      *client.Client
 }
 
@@ -46,6 +49,10 @@ func (runner *Runner) Start() (err error) {
 	}
 
 	if err = runner.start(); err != nil {
+		return errors.WithStack(err)
+	}
+
+	if err = runner.waitForRunning(); err != nil {
 		return errors.WithStack(err)
 	}
 
@@ -102,4 +109,47 @@ func (runner *Runner) start() (err error) {
 		runner.config.ImageName(),
 		runner.config.ContainerName,
 	)
+}
+
+func (runner *Runner) inspect() (json *types.ContainerJSON, err error) {
+
+	var ret types.ContainerJSON
+
+	if ret, err = runner.client.ContainerInspect(runner.context, runner.containerID); err != nil {
+		return nil, errors.Wrapf(err, "Could not inspect docker container, image: %s, name: %s",
+			runner.config.ImageName(),
+			runner.config.ContainerName,
+		)
+	}
+
+	return &ret, nil
+}
+
+func (runner *Runner) waitForRunning() (err error) {
+
+	var (
+		json     *types.ContainerJSON
+		innerErr error
+	)
+
+	err, innerErr = retry.Do(runner.config.WaitTimeout, func() (err error) {
+
+		if json, err = runner.inspect(); err != nil {
+			return errors.WithStack(err)
+		}
+
+		if !json.State.Running {
+			return retry.ErrContinue
+		}
+
+		runner.json = json // Store first inspect after running state
+		return nil         // Exit with success
+
+	})
+
+	if err != nil {
+		return errors.Wrapf(innerErr, "retry end by %s", err.Error())
+	}
+
+	return nil
 }
