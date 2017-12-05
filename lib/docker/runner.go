@@ -64,6 +64,16 @@ func (runner *Runner) Start() (err error) {
 	return nil
 }
 
+// Stop stop and remove a started container
+func (runner *Runner) Stop() (err error) {
+
+	if runner.isStopped() {
+		return nil
+	}
+
+	return nil
+}
+
 func (runner *Runner) isStarted() (started bool) {
 
 	return runner.client != nil
@@ -174,4 +184,9 @@ func (runner *Runner) waitForTCPPorts() (err error) {
 	}
 
 	return nil
+}
+
+func (runner *Runner) isStopped() (stopped bool) {
+
+	return runner.client == nil
 }
