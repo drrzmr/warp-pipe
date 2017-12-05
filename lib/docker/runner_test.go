@@ -58,6 +58,8 @@ func TestRunner(t *testing.T) {
 				err = runner.Start()
 				require.NoError(t, err)
 
+				require.NotEqual(t, "", runner.IPAddress())
+
 				err = runner.Stop()
 				require.NoError(t, err)
 			})

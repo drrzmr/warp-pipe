@@ -35,6 +35,15 @@ func (runner *Runner) Config() *Config {
 	return &runner.config
 }
 
+// IPAddress return container ip address
+func (runner *Runner) IPAddress() (address string) {
+	if runner.json == nil {
+		return ""
+	}
+
+	return runner.json.NetworkSettings.IPAddress
+}
+
 // Start create, start and wait for container
 func (runner *Runner) Start() (err error) {
 	if runner.isStarted() {
