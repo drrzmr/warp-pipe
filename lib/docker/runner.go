@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
@@ -41,6 +42,10 @@ func (runner *Runner) Start() (err error) {
 	}
 
 	if err = runner.create(); err != nil {
+		return errors.WithStack(err)
+	}
+
+	if err = runner.start(); err != nil {
 		return errors.WithStack(err)
 	}
 
@@ -86,4 +91,15 @@ func (runner *Runner) create() (err error) {
 
 	runner.containerID = body.ID
 	return nil
+}
+
+func (runner *Runner) start() (err error) {
+
+	startOptions := types.ContainerStartOptions{}
+
+	err = runner.client.ContainerStart(runner.context, runner.containerID, startOptions)
+	return errors.Wrapf(err, "Could not start docker container, image: %s, name: %s",
+		runner.config.ImageName(),
+		runner.config.ContainerName,
+	)
 }
