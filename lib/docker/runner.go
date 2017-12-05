@@ -71,6 +71,10 @@ func (runner *Runner) Stop() (err error) {
 		return nil
 	}
 
+	if err = runner.stop(); err != nil {
+		return errors.WithStack(err)
+	}
+
 	return nil
 }
 
@@ -189,4 +193,13 @@ func (runner *Runner) waitForTCPPorts() (err error) {
 func (runner *Runner) isStopped() (stopped bool) {
 
 	return runner.client == nil
+}
+
+func (runner *Runner) stop() (err error) {
+
+	err = runner.client.ContainerStop(runner.context, runner.containerID, nil)
+	return errors.Wrapf(err, "Could not stop docker container, image: %s, name: %s",
+		runner.config.ImageName(),
+		runner.config.ContainerName,
+	)
 }
