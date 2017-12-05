@@ -9,6 +9,7 @@ import (
 
 	"github.com/pagarme/warp-pipe/lib/postgres"
 	"github.com/pagarme/warp-pipe/lib/postgres/database"
+	"github.com/pagarme/warp-pipe/lib/retry"
 )
 
 func TestDatabase(t *testing.T) {
@@ -37,5 +38,19 @@ func TestDatabase(t *testing.T) {
 
 		expectedErr := fmt.Errorf("sql: unknown driver %q (forgotten import?)", "")
 		require.Equal(t, expectedErr, causeErr)
+	})
+
+	t.Run("ConnectTimeout", func(t *testing.T) {
+
+		var err error
+
+		d := database.New(postgres.Config{
+			Driver:         "pgx",
+			ConnectTimeout: 0,
+		})
+
+		err = d.Connect()
+		require.Error(t, err)
+		require.Equal(t, retry.ErrTimeout, errors.Cause(err))
 	})
 }
