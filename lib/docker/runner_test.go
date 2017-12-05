@@ -36,4 +36,27 @@ func TestRunner(t *testing.T) {
 		}
 	})
 
+	t.Run("Run", func(t *testing.T) {
+
+		for _, test := range table {
+
+			t.Run(test.expected, func(t *testing.T) {
+
+				var err error
+
+				runner := docker.NewRunner(docker.Config{
+					URL:   test.url,
+					Image: test.image,
+					Tag:   test.tag,
+
+					WaitTimeout: docker.DefaultWaitTimeout,
+				})
+
+				err = runner.Start()
+				require.NoError(t, err)
+			})
+		}
+
+	})
+
 }
