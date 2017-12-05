@@ -37,6 +37,9 @@ func TestRunner(t *testing.T) {
 	})
 
 	t.Run("Run", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("Skip integration test")
+		}
 
 		for _, test := range table {
 
