@@ -28,7 +28,7 @@ type Config struct {
 }
 
 // DSN return dsn (data source name)
-func (c *Config) DSN(setDatabase bool) (dsn string, missing []string) {
+func (c *Config) DSN(setDatabase, setPassword bool) (dsn string, missing []string) {
 
 	var url []string
 
@@ -38,7 +38,7 @@ func (c *Config) DSN(setDatabase bool) (dsn string, missing []string) {
 		missing = append(missing, "user")
 	}
 
-	if len(c.Password) > 0 {
+	if len(c.Password) > 0 && setPassword {
 		url = append(url, fmt.Sprintf("password=%s", c.Password))
 	} else {
 		missing = append(missing, "password")

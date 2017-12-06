@@ -41,6 +41,21 @@ func (d *Database) Connect() (err error) {
 	return errors.WithStack(err)
 }
 
+// Disconnect from database
+func (d *Database) Disconnect() (err error) {
+	if !d.isConnected() {
+		return nil
+	}
+
+	if err = d.db.Close(); err == nil {
+		d.db = nil
+		return nil
+	}
+
+	dsn, _ := d.config.DSN(true, false)
+	return errors.Wrapf(err, "Could not disconnect from database, dsn: %s", dsn)
+}
+
 func (d *Database) isConnected() (connected bool) {
 
 	return d.db != nil
@@ -50,7 +65,7 @@ func (d *Database) connect() (err error) {
 
 	var (
 		driver  = d.config.Driver
-		dsn, m  = d.config.DSN(true)
+		dsn, m  = d.config.DSN(true, true)
 		timeout = d.config.ConnectTimeout
 	)
 

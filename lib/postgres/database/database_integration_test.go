@@ -63,5 +63,8 @@ func TestDatabaseIntegration(t *testing.T) {
 
 		err = d.Connect()
 		require.NoError(t, err)
+
+		err = d.Disconnect()
+		require.NoError(t, err)
 	})
 }
