@@ -1,7 +1,6 @@
 package database_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -36,8 +35,7 @@ func TestDatabase(t *testing.T) {
 		causeErr := errors.Cause(err)
 		require.Error(t, causeErr)
 
-		expectedErr := fmt.Errorf("sql: unknown driver %q (forgotten import?)", "")
-		require.Equal(t, expectedErr, causeErr)
+		require.Equal(t, postgres.ErrInvalidDSN, causeErr)
 	})
 
 	t.Run("ConnectTimeout", func(t *testing.T) {
@@ -45,6 +43,12 @@ func TestDatabase(t *testing.T) {
 		var err error
 
 		d := database.New(postgres.Config{
+			Host:     "host",
+			Database: "db",
+			User:     "user",
+			Port:     123,
+			Password: "password",
+
 			Driver:         "pgx",
 			ConnectTimeout: 0,
 		})

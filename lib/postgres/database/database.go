@@ -50,9 +50,13 @@ func (d *Database) connect() (err error) {
 
 	var (
 		driver  = d.config.Driver
-		dsn     = d.config.DSN()
+		dsn, m  = d.config.DSN(true)
 		timeout = d.config.ConnectTimeout
 	)
+
+	if len(m) != 0 {
+		return errors.Wrapf(postgres.ErrInvalidDSN, "Missing list should be empty, and not: %v", m)
+	}
 
 	d.db, err = connect(driver, dsn, timeout)
 

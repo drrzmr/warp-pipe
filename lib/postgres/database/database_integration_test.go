@@ -21,6 +21,12 @@ func TestDatabaseIntegration(t *testing.T) {
 		var err error
 
 		d := database.New(postgres.Config{
+			Host:     "localhost",
+			Port:     postgres.DefaultPort,
+			User:     postgres.DefaultUser,
+			Password: "password",
+			Database: "database",
+
 			Driver:         "pgx",
 			ConnectTimeout: postgres.MinConnectTimeout,
 		})
