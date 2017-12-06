@@ -46,6 +46,11 @@ func (d *Database) Connect() (err error) {
 	return errors.WithStack(err)
 }
 
+// DB return database object
+func (d *Database) DB() *sql.DB {
+	return d.db
+}
+
 // Disconnect from database
 func (d *Database) Disconnect() (err error) {
 	if !d.isConnected() {
