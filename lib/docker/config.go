@@ -8,7 +8,7 @@ import (
 const (
 	minWaitTimeout = 10 * time.Second
 	// DefaultWaitTimeout default timeout
-	DefaultWaitTimeout = minWaitTimeout
+	DefaultWaitTimeout = 5 * minWaitTimeout
 )
 
 // Config object
