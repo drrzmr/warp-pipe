@@ -20,11 +20,14 @@ type Config struct {
 	User     string
 	Password string
 	Host     string
-	Port     uint16
 	Database string
 
 	Driver         string
 	ConnectTimeout time.Duration
+
+	Port uint16
+
+	CreateDatabaseIfNotExist bool
 }
 
 // DSN return dsn (data source name)

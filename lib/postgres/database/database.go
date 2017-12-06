@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	// connect pgx to database/sql
@@ -35,6 +36,10 @@ func (d *Database) Connect() (err error) {
 
 	if d.isConnected() {
 		return nil
+	}
+
+	if err = d.createDatabaseIfNotExist(); err != nil {
+		return errors.WithStack(err)
 	}
 
 	err = d.connect()
@@ -76,6 +81,30 @@ func (d *Database) connect() (err error) {
 	d.db, err = connect(driver, dsn, timeout)
 
 	return errors.WithStack(err)
+}
+
+func (d *Database) createDatabaseIfNotExist() (err error) {
+
+	if !d.config.CreateDatabaseIfNotExist {
+		return nil
+	}
+
+	var (
+		db       *sql.DB
+		driver   = d.config.Driver
+		timeout  = d.config.ConnectTimeout
+		database = d.config.Database
+		dsn, _   = d.config.DSN(false, true)
+		query    = fmt.Sprintf(`CREATE DATABASE "%s"`, database)
+	)
+
+	if db, err = connect(driver, dsn, timeout); err != nil {
+		return errors.WithStack(err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec(query)
+	return errors.Wrapf(err, "Could not create, query: %s, database: %s", query, database)
 }
 
 func connect(driver, dsn string, timeout time.Duration) (db *sql.DB, err error) {
