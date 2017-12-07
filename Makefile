@@ -4,6 +4,9 @@ linter:
 	gometalinter --config=metalinter.json ./...
 
 test:
+	go test -v -race -short -covermode=atomic ./...
+
+test-full:
 	go test -v -race -covermode=atomic ./...
 
 dep:

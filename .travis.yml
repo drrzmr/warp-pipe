@@ -12,4 +12,4 @@ script:
   - make test
 
 after_success:
-  - goveralls -v -race -covermode=atomic -service=travis-ci
+  - goveralls -v -race -flags -short -covermode=atomic -service=travis-ci
