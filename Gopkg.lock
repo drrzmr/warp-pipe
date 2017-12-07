@@ -91,6 +91,12 @@
   version = "v3.0.1"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/looplab/fsm"
+  packages = ["."]
+  revision = "bcc3636384ce80a109a6039432b30ff5b82476ee"
+
+[[projects]]
   name = "github.com/opencontainers/go-digest"
   packages = ["."]
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
@@ -165,6 +171,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7927314ee1e60fdc79ee9eb89a2d54b24bf039b7d75d32739473173892615dc5"
+  inputs-digest = "cca30d7c10f21878a92dfba8c1b1daa3e9d3dba3d3811d5cd25bb383a61b9011"
   solver-name = "gps-cdcl"
   solver-version = 1
