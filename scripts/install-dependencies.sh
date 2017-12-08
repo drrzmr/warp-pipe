@@ -17,4 +17,4 @@ git checkout -B build
 git reset --hard ${GOMETALINTER_VERSION}
 cd ${GOPATH}
 go install github.com/alecthomas/gometalinter
-gometalinter --debug --install
+gometalinter --debug --vendored-linters --install

@@ -9,7 +9,7 @@ const (
 	// DefaultSleep default time to sleep between retries
 	DefaultSleep = 100 * time.Millisecond
 	// DefaultAttempts default number of attempts
-	DefaultAttempts = uint64(100)
+	DefaultAttempts = uint64(200)
 )
 
 // CallbackFunc callback func for retry.Do

@@ -85,6 +85,12 @@
   version = "v1.0"
 
 [[projects]]
+  name = "github.com/jackc/pgx"
+  packages = [".","chunkreader","internal/sanitize","pgio","pgproto3","pgtype","stdlib"]
+  revision = "66918e80dfde8d5cb09af9aebf40e2cce2eb0cc0"
+  version = "v3.0.1"
+
+[[projects]]
   name = "github.com/opencontainers/go-digest"
   packages = ["."]
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
@@ -159,6 +165,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b3397ef2c86a57e1f71160f8204dbb7d23c5c68682b5f8f7345c0a3590b45314"
+  inputs-digest = "7927314ee1e60fdc79ee9eb89a2d54b24bf039b7d75d32739473173892615dc5"
   solver-name = "gps-cdcl"
   solver-version = 1
