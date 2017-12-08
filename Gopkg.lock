@@ -86,7 +86,7 @@
 
 [[projects]]
   name = "github.com/jackc/pgx"
-  packages = [".","chunkreader","internal/sanitize","pgio","pgproto3","pgtype"]
+  packages = [".","chunkreader","internal/sanitize","pgio","pgproto3","pgtype","stdlib"]
   revision = "66918e80dfde8d5cb09af9aebf40e2cce2eb0cc0"
   version = "v3.0.1"
 
@@ -165,6 +165,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b490ca1d3783e69f61c993faedc60ac6a2e9536006543eec64d40b7d52f18b53"
+  inputs-digest = "7927314ee1e60fdc79ee9eb89a2d54b24bf039b7d75d32739473173892615dc5"
   solver-name = "gps-cdcl"
   solver-version = 1
