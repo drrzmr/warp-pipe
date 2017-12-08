@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/pagarme/warp-pipe/lib/parser/testdecoding"
+	"github.com/pagarme/warp-pipe/lib/tester/file"
 )
 
 func TestParser(t *testing.T) {
@@ -52,5 +53,19 @@ func TestParser(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, readLine, testCase.line)
 		}
+	})
+
+	t.Run("Parse", func(t *testing.T) {
+		parser := testdecoding.NewParser()
+
+		file.ForEachLine(t, "transaction", func(line string) {
+			parser.Append(line)
+		})
+
+		transaction, err := parser.Parse()
+
+		require.NoError(t, err)
+		require.NotNil(t, transaction)
+		require.NotEmpty(t, transaction)
 	})
 }

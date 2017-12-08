@@ -1,0 +1,9 @@
+BEGIN 627
+table public.table_with_pk: INSERT: a[integer]:1 b[character varying]:'Backup and Restore' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'
+table public.table_with_pk: INSERT: a[integer]:2 b[character varying]:'Tuning' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'
+table public.table_with_pk: INSERT: a[integer]:3 b[character varying]:'Replication' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'
+table public.table_with_pk: DELETE: a[integer]:1 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'
+table public.table_with_pk: DELETE: a[integer]:2 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'
+table public.table_without_pk: INSERT: a[integer]:1 b[numeric]:2.34 c[text]:'Tapir'
+table public.table_without_pk: UPDATE: a[integer]:1 b[numeric]:2.34 c[text]:'Anta'
+COMMIT 627
