@@ -4,6 +4,7 @@ import (
 	"github.com/jackc/pgx"
 
 	"github.com/pagarme/warp-pipe/lib/postgres"
+	"github.com/pkg/errors"
 )
 
 // Replicate object
@@ -33,10 +34,33 @@ func (r *Replicate) Start() (err error) {
 		return nil
 	}
 
+	if err = r.connect(); err != nil {
+		return errors.WithStack(err)
+	}
+
 	return nil
 }
 
 func (r *Replicate) isStarted() (started bool) {
 
 	return r.conn != nil
+}
+
+func (r *Replicate) connect() (err error) {
+
+	config := pgx.ConnConfig{
+		Host:     r.config.Host,
+		Port:     r.config.Port,
+		User:     r.config.User,
+		Password: r.config.Password,
+		Database: r.config.Database,
+	}
+
+	r.conn, err = pgx.ReplicationConnect(config)
+
+	return errors.Wrapf(err,
+		"Could not connect to postgres, host: %s, user: %s, database: %s",
+		r.config.Host,
+		r.config.User,
+		r.config.Database)
 }
