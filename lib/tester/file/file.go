@@ -1,9 +1,11 @@
 package file
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -53,4 +55,26 @@ func MustMatch(t *testing.T, filename, text string) {
 
 	golden := string(buf)
 	require.Equal(t, golden, text)
+}
+
+// ForEachLineFunc callback argument to ForEachLine func
+type ForEachLineFunc func(line string)
+
+// ForEachLine call ForEachLineFunc for each line in filename
+func ForEachLine(t *testing.T, filename string, cb ForEachLineFunc) {
+	t.Helper()
+
+	fn := fmt.Sprintf("%s.%s", filename, Config.InputExtension)
+	path := filepath.Join("testdata", fn)
+	f, err := os.Open(path)
+	require.NoError(t, err)
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+
+	for scanner.Scan() {
+		cb(scanner.Text())
+	}
+
+	require.NoError(t, scanner.Err())
 }
