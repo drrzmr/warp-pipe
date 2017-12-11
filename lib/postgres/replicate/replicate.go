@@ -38,6 +38,10 @@ func (r *Replicate) Start() (err error) {
 		return errors.WithStack(err)
 	}
 
+	if err = r.createSlot(); err != nil {
+		return errors.WithStack(err)
+	}
+
 	return nil
 }
 
@@ -63,4 +67,22 @@ func (r *Replicate) connect() (err error) {
 		r.config.Host,
 		r.config.User,
 		r.config.Database)
+}
+
+func (r *Replicate) createSlot() (err error) {
+
+	err = r.conn.CreateReplicationSlot(r.config.Slot, r.config.Plugin)
+	if err == nil {
+		return nil
+	}
+
+	if postgres.IsError(err, postgres.DuplicateObject) && r.config.IgnoreDuplicateObjectError {
+		return nil
+	}
+
+	return errors.Wrapf(err,
+		"Something wrong with slot creation, slot: %s, plugin: %s",
+		r.config.Slot,
+		r.config.Plugin,
+	)
 }
