@@ -25,3 +25,18 @@ func New(config postgres.Config) *Replicate {
 func (r *Replicate) Config() *postgres.Config {
 	return &r.config
 }
+
+// Start replication
+func (r *Replicate) Start() (err error) {
+
+	if r.isStarted() {
+		return nil
+	}
+
+	return nil
+}
+
+func (r *Replicate) isStarted() (started bool) {
+
+	return r.conn != nil
+}

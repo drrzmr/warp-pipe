@@ -12,8 +12,14 @@ func TestReplicate(t *testing.T) {
 
 	t.Run("Config", func(t *testing.T) {
 
+		var err error
+
 		r := replicate.New(postgres.Config{})
 		require.NotNil(t, r)
+
+		err = r.Start()
+		require.NoError(t, err)
+
 		config := r.Config()
 		require.NotNil(t, config)
 	})
