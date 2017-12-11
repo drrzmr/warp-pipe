@@ -42,6 +42,10 @@ func (r *Replicate) Start() (err error) {
 		return errors.WithStack(err)
 	}
 
+	if err = r.start(); err != nil {
+		return errors.WithStack(err)
+	}
+
 	return nil
 }
 
@@ -84,5 +88,17 @@ func (r *Replicate) createSlot() (err error) {
 		"Something wrong with slot creation, slot: %s, plugin: %s",
 		r.config.Slot,
 		r.config.Plugin,
+	)
+}
+
+func (r *Replicate) start() (err error) {
+
+	err = r.conn.StartReplication(r.config.Slot, startLsn, timeLine, pluginArgs)
+	return errors.Wrapf(err,
+		"Something wrong with start replication, slot: %s, startLsn: %d, timeLine: %d, pluginArgs: %s",
+		r.config.Slot,
+		startLsn,
+		timeLine,
+		pluginArgs,
 	)
 }

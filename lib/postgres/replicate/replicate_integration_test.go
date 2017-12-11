@@ -67,7 +67,7 @@ func TestIntegrationReplicate(t *testing.T) {
 	require.NoError(t, db.Connect())
 	defer db.Disconnect()
 
-	t.Run("CreateSlot", func(t *testing.T) {
+	t.Run("FullStart", func(t *testing.T) {
 
 		var err error
 
