@@ -22,12 +22,15 @@ type Config struct {
 	Host     string
 	Database string
 
+	Plugin         string
+	Slot           string
 	Driver         string
 	ConnectTimeout time.Duration
 
 	Port uint16
 
-	CreateDatabaseIfNotExist bool
+	CreateDatabaseIfNotExist   bool
+	IgnoreDuplicateObjectError bool
 }
 
 // DSN return dsn (data source name)
