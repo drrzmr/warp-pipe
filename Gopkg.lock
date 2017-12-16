@@ -92,6 +92,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/jmoiron/sqlx"
+  packages = [".","reflectx"]
+  revision = "de8647470aafe4854c976707c431dbe1eb2822c6"
+
+[[projects]]
+  branch = "master"
   name = "github.com/looplab/fsm"
   packages = ["."]
   revision = "bcc3636384ce80a109a6039432b30ff5b82476ee"
@@ -171,6 +177,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4d4e23c1d34a3c732873326d7a2b87e20a7a7c829059bed96d3103dbb596e48d"
+  inputs-digest = "a2600eb479a22f7e4839d00ec3960afd507e007d5eaa2586efe75ddea19c7364"
   solver-name = "gps-cdcl"
   solver-version = 1

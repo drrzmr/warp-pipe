@@ -53,3 +53,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/looplab/fsm"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/jmoiron/sqlx"
