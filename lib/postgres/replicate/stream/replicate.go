@@ -81,28 +81,28 @@ func (r *Replicate) connect() (err error) {
 
 func (r *Replicate) createSlot() (err error) {
 
-	err = r.conn.CreateReplicationSlot(r.config.Slot, r.config.Plugin)
+	err = r.conn.CreateReplicationSlot(r.config.Replicate.Slot, r.config.Replicate.Plugin)
 	if err == nil {
 		return nil
 	}
 
-	if postgres.IsError(err, postgres.DuplicateObject) && r.config.IgnoreDuplicateObjectError {
+	if postgres.IsError(err, postgres.DuplicateObject) && r.config.Replicate.IgnoreDuplicateObjectError {
 		return nil
 	}
 
 	return errors.Wrapf(err,
 		"Something wrong with slot creation, slot: %s, plugin: %s",
-		r.config.Slot,
-		r.config.Plugin,
+		r.config.Replicate.Slot,
+		r.config.Replicate.Plugin,
 	)
 }
 
 func (r *Replicate) start() (err error) {
 
-	err = r.conn.StartReplication(r.config.Slot, startLsn, timeLine, pluginArgs)
+	err = r.conn.StartReplication(r.config.Replicate.Slot, startLsn, timeLine, pluginArgs)
 	return errors.Wrapf(err,
 		"Something wrong with start replication, slot: %s, startLsn: %d, timeLine: %d, pluginArgs: %s",
-		r.config.Slot,
+		r.config.Replicate.Slot,
 		startLsn,
 		timeLine,
 		pluginArgs,

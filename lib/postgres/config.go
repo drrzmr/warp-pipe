@@ -15,6 +15,23 @@ const (
 	DefaultUser = "postgres"
 )
 
+// ReplicateConfig object
+type ReplicateConfig struct {
+	Plugin string
+	Slot   string
+
+	IgnoreDuplicateObjectError bool
+}
+
+// SQLConfig object
+type SQLConfig struct {
+	Driver string
+
+	CreateDatabaseIfNotExist bool
+
+	ConnectTimeout time.Duration
+}
+
 // Config object
 type Config struct {
 	User     string
@@ -22,15 +39,10 @@ type Config struct {
 	Host     string
 	Database string
 
-	Plugin         string
-	Slot           string
-	Driver         string
-	ConnectTimeout time.Duration
+	SQL       SQLConfig
+	Replicate ReplicateConfig
 
 	Port uint16
-
-	CreateDatabaseIfNotExist   bool
-	IgnoreDuplicateObjectError bool
 }
 
 // DSN return dsn (data source name)

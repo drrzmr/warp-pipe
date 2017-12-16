@@ -52,14 +52,15 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 		User:     postgres.DefaultUser,
 		Database: "test-replicate",
 		Password: "postgres",
-
-		Slot:   "test_replicate_slot",
-		Plugin: "test_decoding",
-		Driver: "pgx",
-
-		ConnectTimeout: 10 * time.Second,
-
-		CreateDatabaseIfNotExist: true,
+		Replicate: postgres.ReplicateConfig{
+			Slot:   "test_replicate_slot",
+			Plugin: "test_decoding",
+		},
+		SQL: postgres.SQLConfig{
+			Driver:                   "pgx",
+			ConnectTimeout:           10 * time.Second,
+			CreateDatabaseIfNotExist: true,
+		},
 	}
 
 	// setup database

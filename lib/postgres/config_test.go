@@ -16,8 +16,10 @@ func TestConfig(t *testing.T) {
 		User:     postgres.DefaultUser,
 		Database: "db",
 
-		Driver:         "pgx",
-		ConnectTimeout: postgres.MinConnectTimeout,
+		SQL: postgres.SQLConfig{
+			Driver:         "pgx",
+			ConnectTimeout: postgres.MinConnectTimeout,
+		},
 	}
 
 	dsnNoDatabase, missing := config.DSN(false, true)
