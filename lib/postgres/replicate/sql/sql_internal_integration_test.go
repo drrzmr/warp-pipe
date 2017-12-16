@@ -67,4 +67,17 @@ func TestIntegrationSQL(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, created)
 	})
+
+	t.Run("listSlots", func(t *testing.T) {
+		slots, err := listSlots(db)
+		require.NoError(t, err)
+		require.Len(t, slots, 1)
+		require.Equal(t, slot, slots[0].SlotName)
+		require.Equal(t, plugin, slots[0].Plugin)
+		require.Equal(t, "logical", slots[0].SlotType)
+		require.Equal(t, postgresConfig.Database, slots[0].Database)
+		require.False(t, slots[0].Active)
+		require.Equal(t, int64(-1), slots[0].ActivePID)
+		require.NotEmpty(t, slots[0].RestartLSN)
+	})
 }
