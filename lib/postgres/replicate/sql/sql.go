@@ -30,9 +30,10 @@ const (
 	pluginArgs    = "'include-xids', '1', 'include-timestamp', '1', 'skip-empty-xacts', '0', 'only-local', '0'"
 	listSlotsCols = "slot_name, plugin, slot_type, database, active, active_pid, restart_lsn"
 
-	createSlotQuery = "SELECT * FROM pg_create_logical_replication_slot('%s', '%s');"
-	listSlotsQuery  = "SELECT " + listSlotsCols + " FROM pg_replication_slots;"
-	getChangesQuery = "SELECT * FROM pg_logical_slot_get_changes('%s', NULL, NULL, " + pluginArgs + ");"
+	createSlotQuery  = "SELECT * FROM pg_create_logical_replication_slot('%s', '%s');"
+	listSlotsQuery   = "SELECT " + listSlotsCols + " FROM pg_replication_slots;"
+	getChangesQuery  = "SELECT * FROM pg_logical_slot_get_changes('%s', NULL, NULL, " + pluginArgs + ");"
+	peekChangesQuery = "SELECT * FROM pg_logical_slot_peek_changes('%s', NULL, NULL, " + pluginArgs + ");"
 )
 
 func createSlot(db *sqlx.DB, slot, plugin string) (created bool, err error) {
@@ -89,4 +90,10 @@ func getAllChanges(db *sqlx.DB, slot string) (result []ReplicationEvent, err err
 	query := fmt.Sprintf(getChangesQuery, slot)
 	err = db.Select(&result, query)
 	return result, errors.Wrapf(err, "Could not get all changes, query: %s", query)
+}
+
+func peekAllChanges(db *sqlx.DB, slot string) (result []ReplicationEvent, err error) {
+	query := fmt.Sprintf(peekChangesQuery, slot)
+	err = db.Select(&result, query)
+	return result, errors.Wrapf(err, "Could not peek all changes, query: %s", query)
 }
