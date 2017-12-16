@@ -170,4 +170,12 @@ CREATE TABLE test
 		require.NoError(t, err)
 		require.Len(t, changes, 0)
 	})
+
+	t.Run("dropSlot", func(t *testing.T) {
+		err = dropSlot(db, slot)
+		require.NoError(t, err)
+
+		_, err = peekAllChanges(db, slot)
+		require.Error(t, err)
+	})
 }

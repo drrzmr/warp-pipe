@@ -34,6 +34,7 @@ const (
 	listSlotsQuery   = "SELECT " + listSlotsCols + " FROM pg_replication_slots;"
 	getChangesQuery  = "SELECT * FROM pg_logical_slot_get_changes('%s', NULL, NULL, " + pluginArgs + ");"
 	peekChangesQuery = "SELECT * FROM pg_logical_slot_peek_changes('%s', NULL, NULL, " + pluginArgs + ");"
+	dropSlotQuery    = "SELECT pg_drop_replication_slot('%s');"
 )
 
 func createSlot(db *sqlx.DB, slot, plugin string) (created bool, err error) {
@@ -96,4 +97,10 @@ func peekAllChanges(db *sqlx.DB, slot string) (result []ReplicationEvent, err er
 	query := fmt.Sprintf(peekChangesQuery, slot)
 	err = db.Select(&result, query)
 	return result, errors.Wrapf(err, "Could not peek all changes, query: %s", query)
+}
+
+func dropSlot(db *sqlx.DB, slot string) (err error) {
+	query := fmt.Sprintf(dropSlotQuery, slot)
+	_, err = db.Exec(query)
+	return errors.Wrapf(err, "Could not drop slot, query: %s", query)
 }
