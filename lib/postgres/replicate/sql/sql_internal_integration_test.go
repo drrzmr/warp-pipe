@@ -3,46 +3,22 @@ package sql
 import (
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/require"
 
-	"github.com/pagarme/warp-pipe/lib/docker"
-	"github.com/pagarme/warp-pipe/lib/postgres"
+	"github.com/pagarme/warp-pipe/lib/postgres/replicate"
 	"github.com/pagarme/warp-pipe/lib/retry"
 	postgresTester "github.com/pagarme/warp-pipe/lib/tester/postgres"
-)
-
-var (
-	dockerConfig = docker.Config{
-		WaitTimeout: docker.DefaultWaitTimeout,
-		URL:         "warp-pipe",
-		Image:       "postgres-server",
-		Tag:         "9.5.6",
-	}
-	postgresConfig = postgres.Config{
-		Host:     "none.host",
-		Port:     postgres.DefaultPort,
-		User:     postgres.DefaultUser,
-		Database: "test-replicate",
-		Password: "postgres",
-		Replicate: postgres.ReplicateConfig{
-			Slot:   "test_replicate_slot",
-			Plugin: "test_decoding",
-		},
-		SQL: postgres.SQLConfig{
-			Driver:                   "pgx",
-			ConnectTimeout:           10 * time.Second,
-			CreateDatabaseIfNotExist: true,
-		},
-	}
 )
 
 func TestIntegrationSQL(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skip integration test")
 	}
+
+	dockerConfig := replicate.CreateTestDockerConfig(t)
+	postgresConfig := replicate.CreateTestPostgresConfig(t)
 
 	normal, deferFn := postgresTester.DockerRun(t, dockerConfig, &postgresConfig)
 	defer deferFn()
