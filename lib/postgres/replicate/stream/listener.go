@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx"
+	"github.com/pkg/errors"
 )
 
 // EventListener interface
@@ -39,6 +40,30 @@ func (d *DefaultEventListener) Run(ctx context.Context) (err error) {
 
 	fmt.Printf("[listener] Run() <--\n")
 	return nil
+}
+
+func filterError(message *pgx.ReplicationMessage, handler EventHandler, inErr error) (ignore bool, outErr error) {
+
+	if isTimeout(inErr) {
+		handler.WaitTimeout()
+		return true, nil
+	}
+
+	if isCancel(inErr) {
+		return false, errors.Wrap(inErr, "canceled context")
+	}
+
+	if isEOF(inErr) {
+		handler.EOF()
+		return false, errors.Wrap(inErr, "end of postgres stream messages")
+	}
+
+	if isWeird(message, inErr) {
+		handler.Weird(message, inErr)
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func isHeartbeat(m *pgx.ReplicationMessage) bool {
