@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync/atomic"
+	"time"
 
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
@@ -34,7 +35,59 @@ func NewDefaultEventListener(replicate *Replicate, handler EventHandler) EventLi
 // Run start listener execution
 func (d *DefaultEventListener) Run(ctx context.Context) (err error) {
 
-	return nil
+	err = run(ctx,
+		d.replicate.conn,
+		d.handler,
+		d.replicate.config.Streaming.SendStandByStatusPeriod,
+		d.replicate.config.Streaming.WaitMessageTimeout,
+		&d.consumedWalPosition,
+	)
+
+	return errors.WithStack(err)
+}
+
+func run(ctx context.Context,
+	conn *pgx.ReplicationConn,
+	handler EventHandler,
+	statusPeriod, messageTimeout time.Duration,
+	consumedWalPosition *uint64) (err error) {
+
+	standByStatusTicker := time.NewTicker(statusPeriod)
+	defer standByStatusTicker.Stop()
+
+	for {
+		select {
+		case <-standByStatusTicker.C:
+
+			if err = sendStandByStatus(conn, consumedWalPosition); err != nil {
+				return errors.WithStack(err)
+			}
+
+		default:
+			runContext, cancel := context.WithTimeout(ctx, messageTimeout)
+			message, err := conn.WaitForReplicationMessage(runContext)
+			cancel()
+
+			if ignore, err := filterError(message, handler, err); err != nil {
+				return errors.WithStack(err)
+			} else if ignore {
+				continue
+			}
+
+			if isHeartbeat(message) {
+				handler.Heartbeat(message.ServerHeartbeat)
+				continue
+			}
+
+			if isMessage(message) {
+				handler.Message(message.WalMessage)
+				continue
+
+			}
+
+			handler.Weird(message, err)
+		}
+	}
 }
 
 func filterError(message *pgx.ReplicationMessage, handler EventHandler, inErr error) (ignore bool, outErr error) {

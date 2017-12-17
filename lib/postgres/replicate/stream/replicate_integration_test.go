@@ -2,8 +2,10 @@ package stream_test
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"testing"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
@@ -47,10 +49,15 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 		err = r.Connect()
 		require.NoError(t, err)
 
-		ctx := context.WithValue(context.Background(), "name", "replicate")
+		ctx, cancel := context.WithCancel(context.Background())
+		time.AfterFunc(10*time.Second, func() {
+			fmt.Println("[timer] canceling...")
+			cancel()
+		})
 
 		started, err := r.Start(ctx, stream.NewDefaultEventListener(r, stream.MockEventHandler))
-		require.NoError(t, err)
-		require.True(t, started)
+		require.Error(t, err)
+		require.Equal(t, context.Canceled, errors.Cause(err))
+		require.False(t, started)
 	})
 }
