@@ -3,6 +3,7 @@ package stream
 import (
 	"context"
 	"fmt"
+	"sync/atomic"
 
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
@@ -18,6 +19,8 @@ type DefaultEventListener struct {
 	EventListener
 	handler   EventHandler
 	replicate *Replicate
+
+	consumedWalPosition uint64
 }
 
 // NewDefaultEventListener simple event listener mock
@@ -64,6 +67,24 @@ func filterError(message *pgx.ReplicationMessage, handler EventHandler, inErr er
 	}
 
 	return false, nil
+}
+
+func sendStandByStatus(conn *pgx.ReplicationConn, consumedWalPosition *uint64) (err error) {
+
+	var (
+		status   *pgx.StandbyStatus
+		position = atomic.LoadUint64(consumedWalPosition)
+	)
+
+	if status, err = pgx.NewStandbyStatus(position); err != nil {
+		return errors.Wrapf(err, "create new standby status object failed, position: %d", position)
+	}
+
+	err = conn.SendStandbyStatus(status)
+	if err == nil {
+		fmt.Printf("[listener] send standby status, position: %d\n", position)
+	}
+	return errors.Wrapf(err, "send stand by status failed, position: %d", position)
 }
 
 func isHeartbeat(m *pgx.ReplicationMessage) bool {
