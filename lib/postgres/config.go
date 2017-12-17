@@ -32,6 +32,12 @@ type SQLConfig struct {
 	ConnectTimeout time.Duration
 }
 
+// StreamingReplicateProtocolConfig config object
+type StreamingReplicateProtocolConfig struct {
+	SendStandByStatusPeriod time.Duration
+	WaitMessageTimeout      time.Duration
+}
+
 // Config object
 type Config struct {
 	User     string
@@ -43,6 +49,8 @@ type Config struct {
 	Replicate ReplicateConfig
 
 	Port uint16
+
+	Streaming StreamingReplicateProtocolConfig
 }
 
 // DSN return dsn (data source name)

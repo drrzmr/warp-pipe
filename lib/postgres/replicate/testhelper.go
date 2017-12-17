@@ -27,6 +27,10 @@ func CreateTestPostgresConfig(t *testing.T) (config postgres.Config) {
 			ConnectTimeout:           10 * time.Second,
 			CreateDatabaseIfNotExist: true,
 		},
+		Streaming: postgres.StreamingReplicateProtocolConfig{
+			SendStandByStatusPeriod: 5 * time.Second,
+			WaitMessageTimeout:      5 * time.Second,
+		},
 	}
 }
 
