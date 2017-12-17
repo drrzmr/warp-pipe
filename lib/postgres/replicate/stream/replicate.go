@@ -1,6 +1,8 @@
 package stream
 
 import (
+	"context"
+
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
 
@@ -15,19 +17,18 @@ const (
 
 // Replicate object
 type Replicate struct {
-	config  postgres.Config
-	started bool
-	conn    *pgx.ReplicationConn
+	config   postgres.Config
+	conn     *pgx.ReplicationConn
+	listener EventListener
 }
 
 // New create a Replicate object
 func New(config postgres.Config) *Replicate {
 
 	return &Replicate{
-		config: config,
-		conn:   nil,
-
-		started: false,
+		config:   config,
+		conn:     nil,
+		listener: nil,
 	}
 }
 
@@ -55,7 +56,7 @@ func (r *Replicate) Connect() (err error) {
 }
 
 // Start replication
-func (r *Replicate) Start() (started bool, err error) {
+func (r *Replicate) Start(ctx context.Context, listener EventListener) (started bool, err error) {
 
 	if r.isStarted() || !r.isConnected() {
 		return false, nil
@@ -65,7 +66,12 @@ func (r *Replicate) Start() (started bool, err error) {
 		return false, errors.WithStack(err)
 	}
 
-	r.started = true
+	r.listener = listener
+
+	if err = r.listener.Run(ctx); err != nil {
+		return false, errors.WithStack(err)
+	}
+
 	return true, nil
 }
 
@@ -76,7 +82,7 @@ func (r *Replicate) isConnected() (connected bool) {
 
 func (r *Replicate) isStarted() (connected bool) {
 
-	return r.started
+	return r.listener != nil
 }
 
 func (r *Replicate) connect() (err error) {

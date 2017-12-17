@@ -1,6 +1,7 @@
 package stream_test
 
 import (
+	"context"
 	"net"
 	"testing"
 
@@ -46,7 +47,9 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 		err = r.Connect()
 		require.NoError(t, err)
 
-		started, err := r.Start()
+		ctx := context.WithValue(context.Background(), "name", "replicate")
+
+		started, err := r.Start(ctx, stream.NewDefaultEventListener(r, stream.MockEventHandler))
 		require.NoError(t, err)
 		require.True(t, started)
 	})
