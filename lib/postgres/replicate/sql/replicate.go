@@ -8,6 +8,11 @@ import (
 	"github.com/pagarme/warp-pipe/lib/retry"
 )
 
+/*
+ * https://www.postgresql.org/docs/9.4/static/logicaldecoding-example.html
+ * https://www.postgresql.org/docs/9.4/static/functions-admin.html
+ */
+
 // Replicate object
 type Replicate struct {
 	db     *sqlx.DB
@@ -20,6 +25,65 @@ func New(config postgres.Config) (r *Replicate) {
 		config: config,
 		db:     nil,
 	}
+}
+
+// Connect public method
+func (r *Replicate) Connect() (err error) {
+
+	if r.isConnected() {
+		return nil
+	}
+
+	if err = r.connect(); err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+// CreateSlot public method
+func (r *Replicate) CreateSlot() (created bool, err error) {
+
+	created, err = createSlot(r.db, r.config.Replicate.Slot, r.config.Replicate.Plugin)
+	return created, errors.WithStack(err)
+}
+
+// ListSlots public method
+func (r *Replicate) ListSlots() (result []SlotInfo, err error) {
+
+	result, err = listSlots(r.db)
+	return result, errors.WithStack(err)
+}
+
+// GetAllChanges public method
+func (r *Replicate) GetAllChanges() (result []ReplicationEvent, err error) {
+
+	result, err = getAllChanges(r.db, r.config.Replicate.Slot)
+	return result, errors.WithStack(err)
+}
+
+// PeekAllChanges public method
+func (r *Replicate) PeekAllChanges() (result []ReplicationEvent, err error) {
+
+	result, err = peekAllChanges(r.db, r.config.Replicate.Slot)
+	return result, errors.WithStack(err)
+}
+
+// DropSlot public method
+func (r *Replicate) DropSlot() (err error) {
+
+	err = dropSlot(r.db, r.config.Replicate.Slot)
+	return errors.WithStack(err)
+}
+
+// Close public method
+func (r *Replicate) Close() (err error) {
+
+	err = r.db.Close()
+	if err == nil {
+		r.db = nil
+	}
+	return errors.Wrap(err, "Could not close connection")
 }
 
 func (r *Replicate) connect() (err error) {
