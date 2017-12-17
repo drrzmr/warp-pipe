@@ -15,8 +15,9 @@ const (
 
 // Replicate object
 type Replicate struct {
-	config postgres.Config
-	conn   *pgx.ReplicationConn
+	config  postgres.Config
+	started bool
+	conn    *pgx.ReplicationConn
 }
 
 // New create a Replicate object
@@ -25,6 +26,8 @@ func New(config postgres.Config) *Replicate {
 	return &Replicate{
 		config: config,
 		conn:   nil,
+
+		started: false,
 	}
 }
 
@@ -33,10 +36,10 @@ func (r *Replicate) Config() *postgres.Config {
 	return &r.config
 }
 
-// Start replication
-func (r *Replicate) Start() (err error) {
+// Connect to postgres
+func (r *Replicate) Connect() (err error) {
 
-	if r.isStarted() {
+	if r.isConnected() {
 		return nil
 	}
 
@@ -48,16 +51,32 @@ func (r *Replicate) Start() (err error) {
 		return errors.WithStack(err)
 	}
 
-	if err = r.start(); err != nil {
-		return errors.WithStack(err)
-	}
-
 	return nil
 }
 
-func (r *Replicate) isStarted() (started bool) {
+// Start replication
+func (r *Replicate) Start() (started bool, err error) {
+
+	if r.isStarted() || !r.isConnected() {
+		return false, nil
+	}
+
+	if err = r.start(); err != nil {
+		return false, errors.WithStack(err)
+	}
+
+	r.started = true
+	return true, nil
+}
+
+func (r *Replicate) isConnected() (connected bool) {
 
 	return r.conn != nil
+}
+
+func (r *Replicate) isStarted() (connected bool) {
+
+	return r.started
 }
 
 func (r *Replicate) connect() (err error) {

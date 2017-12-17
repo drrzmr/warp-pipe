@@ -31,8 +31,9 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 			Password: "password",
 			Database: "database",
 		})
+		require.NotNil(t, r)
 
-		err = r.Start()
+		err = r.Connect()
 		require.Error(t, err)
 		require.IsType(t, &net.OpError{}, errors.Cause(err))
 	})
@@ -73,7 +74,13 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 		var err error
 
 		r := stream.New(pgConfig)
-		err = r.Start()
+		require.NotNil(t, r)
+
+		err = r.Connect()
 		require.NoError(t, err)
+
+		started, err := r.Start()
+		require.NoError(t, err)
+		require.True(t, started)
 	})
 }
