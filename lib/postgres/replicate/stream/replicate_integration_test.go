@@ -3,16 +3,13 @@ package stream_test
 import (
 	"net"
 	"testing"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
-	"github.com/pagarme/warp-pipe/lib/docker"
-	"github.com/pagarme/warp-pipe/lib/postgres"
-	"github.com/pagarme/warp-pipe/lib/postgres/database"
+	"github.com/pagarme/warp-pipe/lib/postgres/replicate"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream"
-	dockerTester "github.com/pagarme/warp-pipe/lib/tester/docker"
+	postgresTester "github.com/pagarme/warp-pipe/lib/tester/postgres"
 )
 
 func TestIntegrationStreamReplicate(t *testing.T) {
@@ -20,17 +17,14 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 		t.Skip("Skip integration test")
 	}
 
+	dockerConfig := replicate.CreateTestDockerConfig(t)
+	postgresConfig := replicate.CreateTestPostgresConfig(t)
+
 	t.Run("ConnectNetError", func(t *testing.T) {
 
 		var err error
 
-		r := stream.New(postgres.Config{
-			Host:     "localhost",
-			Port:     postgres.DefaultPort,
-			User:     postgres.DefaultUser,
-			Password: "password",
-			Database: "database",
-		})
+		r := stream.New(postgresConfig)
 		require.NotNil(t, r)
 
 		err = r.Connect()
@@ -39,41 +33,14 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 	})
 
 	// setup postgres server container
-	ipAddress, deferFn := dockerTester.Run(t, docker.Config{
-		WaitTimeout: docker.DefaultWaitTimeout,
-		URL:         "warp-pipe",
-		Image:       "postgres-server",
-		Tag:         "9.5.6",
-	})
+	_, deferFn := postgresTester.DockerRun(t, dockerConfig, &postgresConfig)
 	defer deferFn()
-
-	pgConfig := postgres.Config{
-		Host:     ipAddress,
-		Port:     postgres.DefaultPort,
-		User:     postgres.DefaultUser,
-		Database: "test-replicate",
-		Password: "postgres",
-		Replicate: postgres.ReplicateConfig{
-			Slot:   "test_replicate_slot",
-			Plugin: "test_decoding",
-		},
-		SQL: postgres.SQLConfig{
-			Driver:                   "pgx",
-			ConnectTimeout:           10 * time.Second,
-			CreateDatabaseIfNotExist: true,
-		},
-	}
-
-	// setup database
-	db := database.New(pgConfig)
-	require.NoError(t, db.Connect())
-	defer db.Disconnect()
 
 	t.Run("FullStart", func(t *testing.T) {
 
 		var err error
 
-		r := stream.New(pgConfig)
+		r := stream.New(postgresConfig)
 		require.NotNil(t, r)
 
 		err = r.Connect()
