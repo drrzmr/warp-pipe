@@ -34,14 +34,6 @@ func NewDefaultEventListener(replicate *Replicate, handler EventHandler) EventLi
 // Run start listener execution
 func (d *DefaultEventListener) Run(ctx context.Context) (err error) {
 
-	fmt.Printf("[listener] Run() -->\n")
-
-	d.handler.EOF()
-	if ctx != nil {
-		fmt.Println(ctx.Value("name"))
-	}
-
-	fmt.Printf("[listener] Run() <--\n")
 	return nil
 }
 
