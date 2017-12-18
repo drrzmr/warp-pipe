@@ -1,9 +1,10 @@
 package stream
 
 import (
-	"fmt"
+	"unsafe"
 
 	"github.com/jackc/pgx"
+	"go.uber.org/zap"
 )
 
 // EventHandler interface
@@ -19,26 +20,40 @@ type mockEventHandler struct {
 	EventHandler
 }
 
+var handlerLogger = logger.With(zap.String("submodule", "handler"))
+
 // MockEventHandler mock event handler
 var MockEventHandler = &mockEventHandler{}
 
 func (m *mockEventHandler) Heartbeat(heartbeat *pgx.ServerHeartbeat) {
-	fmt.Println("[handler] heartbeat")
+
+	handlerLogger.Debug("heartbeat event",
+		zap.String("lsn", pgx.FormatLSN(heartbeat.ServerWalEnd)),
+		zap.Uint8("reply.requested", heartbeat.ReplyRequested),
+	)
 }
 
 func (m *mockEventHandler) Message(message *pgx.WalMessage) {
 
-	fmt.Printf("[handler] message, %#x\n", message.WalStart)
+	handlerLogger.Debug("message event",
+		zap.String("lsn", pgx.FormatLSN(message.WalStart)),
+	)
 }
 
 func (m *mockEventHandler) WaitTimeout() {
-	fmt.Println("[handler] wait timeout")
+
+	handlerLogger.Debug("wait timeout")
 }
 
 func (m *mockEventHandler) EOF() {
-	fmt.Println("[handler] EOF")
+
+	handlerLogger.Debug("EOF event")
 }
 
 func (m *mockEventHandler) Weird(message *pgx.ReplicationMessage, err error) {
-	fmt.Println("[handler] weird, message:", message, ", error:", err)
+
+	handlerLogger.Panic("weird event",
+		zap.Error(err),
+		zap.Uintptr("message", uintptr(unsafe.Pointer(message))),
+	)
 }

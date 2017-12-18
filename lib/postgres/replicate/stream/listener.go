@@ -2,12 +2,12 @@ package stream
 
 import (
 	"context"
-	"fmt"
 	"sync/atomic"
 	"time"
 
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // EventListener interface
@@ -24,6 +24,8 @@ type DefaultEventListener struct {
 	consumedWalPosition uint64
 }
 
+var listenerLogger = logger.With(zap.String("submodule", "listener"))
+
 // NewDefaultEventListener simple event listener mock
 func NewDefaultEventListener(replicate *Replicate, handler EventHandler) EventListener {
 	return &DefaultEventListener{
@@ -34,6 +36,9 @@ func NewDefaultEventListener(replicate *Replicate, handler EventHandler) EventLi
 
 // Run start listener execution
 func (d *DefaultEventListener) Run(ctx context.Context) (err error) {
+
+	listenerLogger.Debug("--> Run()")
+	defer listenerLogger.Debug("<-- Run()")
 
 	err = run(ctx,
 		d.replicate.conn,
@@ -127,7 +132,7 @@ func sendStandByStatus(conn *pgx.ReplicationConn, consumedWalPosition *uint64) (
 
 	err = conn.SendStandbyStatus(status)
 	if err == nil {
-		fmt.Printf("[listener] send standby status, position: %d\n", position)
+		listenerLogger.Debug("send standby status", zap.Uint64("position", position))
 	}
 	return errors.Wrapf(err, "send stand by status failed, position: %d", position)
 }
