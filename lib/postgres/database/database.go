@@ -74,9 +74,9 @@ func (d *Database) isConnected() (connected bool) {
 func (d *Database) connect() (err error) {
 
 	var (
-		driver  = d.config.Driver
+		driver  = d.config.SQL.Driver
 		dsn, m  = d.config.DSN(true, true)
-		timeout = d.config.ConnectTimeout
+		timeout = d.config.SQL.ConnectTimeout
 	)
 
 	if len(m) != 0 {
@@ -90,14 +90,14 @@ func (d *Database) connect() (err error) {
 
 func (d *Database) createDatabaseIfNotExist() (err error) {
 
-	if !d.config.CreateDatabaseIfNotExist {
+	if !d.config.SQL.CreateDatabaseIfNotExist {
 		return nil
 	}
 
 	var (
 		db       *sql.DB
-		driver   = d.config.Driver
-		timeout  = d.config.ConnectTimeout
+		driver   = d.config.SQL.Driver
+		timeout  = d.config.SQL.ConnectTimeout
 		database = d.config.Database
 		dsn, _   = d.config.DSN(false, true)
 		query    = fmt.Sprintf(`CREATE DATABASE "%s"`, database)

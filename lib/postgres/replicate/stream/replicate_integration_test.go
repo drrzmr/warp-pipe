@@ -1,4 +1,4 @@
-package replicate_test
+package stream_test
 
 import (
 	"net"
@@ -11,11 +11,11 @@ import (
 	"github.com/pagarme/warp-pipe/lib/docker"
 	"github.com/pagarme/warp-pipe/lib/postgres"
 	"github.com/pagarme/warp-pipe/lib/postgres/database"
-	"github.com/pagarme/warp-pipe/lib/postgres/replicate"
+	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream"
 	dockerTester "github.com/pagarme/warp-pipe/lib/tester/docker"
 )
 
-func TestIntegrationReplicate(t *testing.T) {
+func TestIntegrationStreamReplicate(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skip integration test")
 	}
@@ -24,7 +24,7 @@ func TestIntegrationReplicate(t *testing.T) {
 
 		var err error
 
-		r := replicate.New(postgres.Config{
+		r := stream.New(postgres.Config{
 			Host:     "localhost",
 			Port:     postgres.DefaultPort,
 			User:     postgres.DefaultUser,
@@ -52,14 +52,15 @@ func TestIntegrationReplicate(t *testing.T) {
 		User:     postgres.DefaultUser,
 		Database: "test-replicate",
 		Password: "postgres",
-
-		Slot:   "test_replicate_slot",
-		Plugin: "test_decoding",
-		Driver: "pgx",
-
-		ConnectTimeout: 10 * time.Second,
-
-		CreateDatabaseIfNotExist: true,
+		Replicate: postgres.ReplicateConfig{
+			Slot:   "test_replicate_slot",
+			Plugin: "test_decoding",
+		},
+		SQL: postgres.SQLConfig{
+			Driver:                   "pgx",
+			ConnectTimeout:           10 * time.Second,
+			CreateDatabaseIfNotExist: true,
+		},
 	}
 
 	// setup database
@@ -71,7 +72,7 @@ func TestIntegrationReplicate(t *testing.T) {
 
 		var err error
 
-		r := replicate.New(pgConfig)
+		r := stream.New(pgConfig)
 		err = r.Start()
 		require.NoError(t, err)
 	})

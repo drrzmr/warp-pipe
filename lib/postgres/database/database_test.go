@@ -26,7 +26,9 @@ func TestDatabase(t *testing.T) {
 		var err error
 
 		d := database.New(postgres.Config{
-			Driver: "",
+			SQL: postgres.SQLConfig{
+				Driver: "",
+			},
 		})
 
 		err = d.Connect()
@@ -48,9 +50,10 @@ func TestDatabase(t *testing.T) {
 			User:     "user",
 			Port:     123,
 			Password: "password",
-
-			Driver:         "pgx",
-			ConnectTimeout: 0,
+			SQL: postgres.SQLConfig{
+				Driver:         "pgx",
+				ConnectTimeout: 0,
+			},
 		})
 
 		err = d.Connect()
