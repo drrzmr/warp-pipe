@@ -17,53 +17,14 @@ func TestParser(t *testing.T) {
 	})
 
 	t.Run("Parse", func(t *testing.T) {
-		operationTable := []struct {
+
+		operationTable := make([]struct {
 			Table string
 			Type  string
 			Value string
-		}{
-			{
-				Table: "table_with_pk",
-				Type:  "INSERT",
-				Value: "a[integer]:1 " +
-					"b[character varying]:'Backup and Restore' " +
-					"c[timestamp without time zone]:'2017-11-30 17:59:33.825033'",
-			}, {
-				Table: "table_with_pk",
-				Type:  "INSERT",
-				Value: "a[integer]:2 " +
-					"b[character varying]:'Tuning' " +
-					"c[timestamp without time zone]:'2017-11-30 17:59:33.825033'",
-			}, {
-				Table: "table_with_pk",
-				Type:  "INSERT",
-				Value: "a[integer]:3 " +
-					"b[character varying]:'Replication' " +
-					"c[timestamp without time zone]:'2017-11-30 17:59:33.825033'",
-			}, {
-				Table: "table_with_pk",
-				Type:  "DELETE",
-				Value: "a[integer]:1 " +
-					"c[timestamp without time zone]:'2017-11-30 17:59:33.825033'",
-			}, {
-				Table: "table_with_pk",
-				Type:  "DELETE",
-				Value: "a[integer]:2 " +
-					"c[timestamp without time zone]:'2017-11-30 17:59:33.825033'",
-			}, {
-				Table: "table_without_pk",
-				Type:  "INSERT",
-				Value: "a[integer]:1 " +
-					"b[numeric]:2.34 " +
-					"c[text]:'Tapir'",
-			}, {
-				Table: "table_without_pk",
-				Type:  "UPDATE",
-				Value: "a[integer]:1 " +
-					"b[numeric]:2.34 " +
-					"c[text]:'Anta'",
-			},
-		}
+		}, 0)
+
+		file.LoadJSON(t, "operations", &operationTable)
 
 		parser := testdecoding.NewParser(func(transaction testdecoding.Transaction) {
 
