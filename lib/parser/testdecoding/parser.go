@@ -1,10 +1,10 @@
 package testdecoding
 
 import (
-	"regexp"
-
 	"github.com/looplab/fsm"
 	"github.com/pkg/errors"
+
+	"github.com/pagarme/warp-pipe/lib/parser/testdecoding/re"
 )
 
 // Parser parser struct
@@ -12,12 +12,6 @@ type Parser struct {
 	fsm *fsm.FSM
 	log []string
 }
-
-var (
-	begin  = regexp.MustCompile(`^BEGIN\s\d.+$`)
-	commit = regexp.MustCompile(`^COMMIT\s\d.+$`)
-	op     = regexp.MustCompile(`^table\s\w.+\.\w.+\:\s.*$`)
-)
 
 // NewParser return a new parser struct
 func NewParser() *Parser {
@@ -79,21 +73,21 @@ func (p *Parser) Parse() (t Transaction, err error) {
 	for _, line := range p.log {
 		switch p.fsm.Current() {
 		case "idle":
-			if begin.MatchString(line) {
+			if re.Begin.MatchString(line) {
 				err := p.fsm.Event("begin")
 				if err != nil {
 					return t, errors.Wrap(err, "(begin) transition error")
 				}
 			}
 		case "parsing":
-			if commit.MatchString(line) {
+			if re.Commit.MatchString(line) {
 				err := p.fsm.Event("commit")
 				if err != nil {
 					return t, errors.Wrap(err, "(commit) transition error")
 				}
 			}
 
-			if op.MatchString(line) {
+			if re.Operation.MatchString(line) {
 				operation := NewOperation(line)
 				t.Operations = append(t.Operations, operation)
 			}
