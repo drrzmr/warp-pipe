@@ -13,6 +13,20 @@ type Parser struct {
 	log []string
 }
 
+// Transaction the transactio itself
+type Transaction struct {
+	Operations []Operation
+	ID         uint64
+}
+
+// Operation the operation unit
+type Operation struct {
+	Schema string
+	Table  string
+	Type   string
+	Value  string
+}
+
 // NewParser return a new parser struct
 func NewParser() *Parser {
 
@@ -88,8 +102,13 @@ func (p *Parser) Parse() (t Transaction, err error) {
 			}
 
 			if re.Operation.MatchString(line) {
-				operation := NewOperation(line)
-				t.Operations = append(t.Operations, operation)
+				matchList := re.Operation.FindStringSubmatch(line)
+				t.Operations = append(t.Operations, Operation{
+					Schema: matchList[0],
+					Table:  matchList[1],
+					Type:   matchList[2],
+					Value:  matchList[3],
+				})
 			}
 		}
 	}
