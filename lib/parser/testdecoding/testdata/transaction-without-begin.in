@@ -1,0 +1,3 @@
+table public.table_without_pk: UPDATE: a[integer]:1 b[numeric]:2.34 c[text]:'Anta'
+table public.table_without_pk: UPDATE: a[integer]:55 b[numeric]:5.34 c[text]:'Hello'
+COMMIT 627
