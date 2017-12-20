@@ -1,12 +1,16 @@
 package mock_test
 
 import (
-	"fmt"
 	"testing"
 
+	"go.uber.org/zap"
+
 	"github.com/pagarme/warp-pipe/adapter/collector/mock"
+	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/pipeline/message"
 )
+
+var logger = log.Development("test")
 
 func TestMockCollector(t *testing.T) {
 
@@ -15,12 +19,13 @@ func TestMockCollector(t *testing.T) {
 		publishCh <- message.New(message.Payload{
 			"data": messageID,
 		})
-		fmt.Println("[mock] send message:", messageID)
+		logger.Debug("send message", zap.Uint64("messageID", messageID))
 		return false
 	}
 
 	updateOffset := func(c *mock.Collector, offset uint64) {
-		fmt.Println("[mock] update offset for message:", offset)
+
+		logger.Debug("update offset for message", zap.Uint64("offset", offset))
 	}
 
 	mockCollector := mock.New(10, collect, updateOffset)
@@ -37,7 +42,7 @@ func TestMockCollector(t *testing.T) {
 
 		for msg := range publishCh {
 			messageID := msg.Get("data").(uint64)
-			fmt.Println("[test] consume message:", messageID)
+			logger.Debug("consume message", zap.Uint64("messageID", messageID))
 			offsetCh <- messageID
 		}
 	}(publishCh, offsetCh)

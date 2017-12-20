@@ -1,11 +1,14 @@
 package producer
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/pagarme/warp-pipe/lib/log"
+	"go.uber.org/zap"
 )
+
+var logger = log.Development("producer")
 
 // Run kafka producer
 func Run() (err error) {
@@ -51,16 +54,20 @@ func Run() (err error) {
 			select {
 			case producer.Input() <- msg:
 				enqueued++
-				fmt.Println("Message sent")
-				fmt.Printf("Enqueued: %d; Erros: %d\n", enqueued, errors)
+				logger.Debug("Message sent",
+					zap.Int("enqueued", enqueued),
+					zap.Int("errors", errors),
+				)
 			case <-producer.Successes():
 				enqueued--
-				fmt.Println("Message delivered")
-				fmt.Printf("Enqueued: %d; Erros: %d\n", enqueued, errors)
+				logger.Debug("Message delivered",
+					zap.Int("enqueued", enqueued),
+					zap.Int("errors", errors),
+				)
 				doneCh <- struct{}{}
 			case err := <-producer.Errors():
 				errors++
-				fmt.Println("Failed to produce message:", err)
+				logger.Debug("Failed to produce message", zap.Error(err))
 			}
 		}
 	}()

@@ -6,7 +6,9 @@ import (
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
 
+	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres"
+	"go.uber.org/zap"
 )
 
 const (
@@ -14,6 +16,8 @@ const (
 	startLsn   = uint64(0)
 	timeLine   = int64(-1)
 )
+
+var logger = log.Development("replicate")
 
 // Replicate object
 type Replicate struct {
@@ -40,15 +44,21 @@ func (r *Replicate) Config() *postgres.Config {
 // Connect to postgres
 func (r *Replicate) Connect() (err error) {
 
+	logger.Debug("--> Connect()")
+	defer logger.Debug("<-- Connect()")
+
 	if r.isConnected() {
+		logger.Info("already connected")
 		return nil
 	}
 
 	if err = r.connect(); err != nil {
+		logger.Error("connect error")
 		return errors.WithStack(err)
 	}
 
 	if err = r.createSlot(); err != nil {
+		logger.Error("create slot error")
 		return errors.WithStack(err)
 	}
 
@@ -58,17 +68,32 @@ func (r *Replicate) Connect() (err error) {
 // Start replication
 func (r *Replicate) Start(ctx context.Context, listener EventListener) (started bool, err error) {
 
-	if r.isStarted() || !r.isConnected() {
+	logger.Debug("--> Start()")
+	defer logger.Debug("<-- Start()")
+
+	if !r.isConnected() {
+		logger.Error("not connected")
+		return false, nil
+	}
+
+	if r.isStarted() {
+		logger.Error("already started")
 		return false, nil
 	}
 
 	if err = r.start(); err != nil {
+		logger.Error("start error")
 		return false, errors.WithStack(err)
 	}
 
 	r.listener = listener
 
 	if err = r.listener.Run(ctx); err != nil {
+
+		// filter context canceled
+		canceled := errors.Cause(err) == context.Canceled
+		logger.DebugIf(canceled, "context canceled")
+		logger.ErrorIf(!canceled, "listener run", zap.Error(err))
 		return false, errors.WithStack(err)
 	}
 
