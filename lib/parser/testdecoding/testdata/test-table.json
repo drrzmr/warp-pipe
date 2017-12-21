@@ -1,0 +1,211 @@
+[
+  {
+    "filename": "transaction",
+    "transactions": [
+      {
+        "id": 627,
+        "operations": [
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "INSERT",
+            "value": "a[integer]:1 b[character varying]:'Backup and Restore' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          },
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "INSERT",
+            "value": "a[integer]:2 b[character varying]:'Tuning' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          },
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "INSERT",
+            "value": "a[integer]:3 b[character varying]:'Replication' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          },
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "DELETE",
+            "value": "a[integer]:1 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          },
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "DELETE",
+            "value": "a[integer]:2 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          },
+          {
+            "schema": "public",
+            "table": "table_without_pk",
+            "type": "INSERT",
+            "value": "a[integer]:1 b[numeric]:2.34 c[text]:'Tapir'"
+          },
+          {
+            "schema": "public",
+            "table": "table_without_pk",
+            "type": "UPDATE",
+            "value": "a[integer]:1 b[numeric]:2.34 c[text]:'Anta'"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filename": "transaction-invalid",
+    "transactions": [],
+    "expectedErrors": [
+      "invalid message",
+      "invalid message",
+      "invalid message",
+      "invalid message",
+      "invalid message"
+    ]
+  },
+  {
+    "filename": "transaction-messy-but-valid",
+    "transactions": [
+      {
+        "id": 627,
+        "operations": [
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "INSERT",
+            "value": "a[integer]:3 b[character varying]:'Replication' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          },
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "DELETE",
+            "value": "a[integer]:1 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          }
+        ]
+      }
+    ],
+    "expectedErrors": [
+      "event event.CommitIn inappropriate in current state state.Idle",
+      "event event.OperationIn inappropriate in current state state.Idle",
+      "event event.OperationIn inappropriate in current state state.Idle"
+    ]
+  },
+  {
+    "filename": "transaction-messy",
+    "transactions": [],
+    "expectedErrors": [
+      "event event.CommitIn inappropriate in current state state.Idle",
+      "event event.OperationIn inappropriate in current state state.Idle",
+      "event event.OperationIn inappropriate in current state state.Idle",
+      "invalid message"
+    ]
+  },
+  {
+    "filename": "transaction-multiples",
+    "transactions": [
+      {
+        "id": 627,
+        "operations": [
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "INSERT",
+            "value": "a[integer]:2 b[character varying]:'Tuning' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          },
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "DELETE",
+            "value": "a[integer]:2 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          },
+          {
+            "schema": "public",
+            "table": "table_without_pk",
+            "type": "UPDATE",
+            "value": "a[integer]:1 b[numeric]:2.34 c[text]:'Anta'"
+          }
+        ]
+      },
+      {
+        "id": 628,
+        "operations": [
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "DELETE",
+            "value": "a[integer]:2 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          }
+        ]
+      },
+      {
+        "id": 629,
+        "operations": [
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "INSERT",
+            "value": "a[integer]:2 b[character varying]:'Tuning' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          },
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "DELETE",
+            "value": "a[integer]:2 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          },
+          {
+            "schema": "public",
+            "table": "table_without_pk",
+            "type": "UPDATE",
+            "value": "a[integer]:1 b[numeric]:2.34 c[text]:'Anta'"
+          },
+          {
+            "schema": "public",
+            "table": "table_with_pk",
+            "type": "INSERT",
+            "value": "a[integer]:2 b[character varying]:'Tuning' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filename": "transaction-without-begin-id",
+    "transactions": [],
+    "expectedErrors": [
+      "invalid message",
+      "event event.OperationIn inappropriate in current state state.Idle",
+      "event event.OperationIn inappropriate in current state state.Idle",
+      "event event.CommitIn inappropriate in current state state.Idle"
+    ]
+  },
+  {
+    "filename": "transaction-without-begin",
+    "transactions": [],
+    "expectedErrors": [
+      "event event.OperationIn inappropriate in current state state.Idle",
+      "event event.OperationIn inappropriate in current state state.Idle",
+      "event event.CommitIn inappropriate in current state state.Idle"
+    ]
+  },
+  {
+    "filename": "transaction-without-commit-id",
+    "transactions": [],
+    "expectedErrors": [
+      "invalid message"
+    ]
+  },
+  {
+    "filename": "transaction-without-commit",
+    "transactions": [],
+    "expectedErrors": []
+  },
+  {
+    "filename": "transaction-without-operations",
+    "transactions": [
+      {
+        "id": 627,
+        "operations": []
+      }
+    ],
+    "expectedErrors": []
+  }
+]
