@@ -11,10 +11,8 @@ import (
 
 type testCollector struct {
 	collector.Collector
-	t              *testing.T
-	n              uint64
-	publishCh      chan<- message.Message
-	updateOffsetCh <-chan uint64
+	t *testing.T
+	n uint64
 }
 
 const numberOfMessages = uint64(100)
@@ -26,40 +24,31 @@ func newTestCollector(t *testing.T) *testCollector {
 	}
 }
 
-func (c *testCollector) Init(publishCh chan<- message.Message, updateOffsetCh <-chan uint64) (err error) {
+func (c *testCollector) Init() (err error) { return nil }
 
-	c.publishCh = publishCh
-	c.updateOffsetCh = updateOffsetCh
-
-	return nil
-}
-
-func (c *testCollector) Collect() {
-	defer close(c.publishCh)
+func (c *testCollector) Collect(publishCh chan<- message.Message) {
+	defer close(publishCh)
 
 	for i := uint64(0); i < c.n; i++ {
-		c.publishCh <- message.New(message.Payload{
+		publishCh <- message.New(message.Payload{
 			"data": i,
 		})
 	}
 }
 
-func (c *testCollector) UpdateOffset() {
+func (c *testCollector) UpdateOffset(offsetCh <-chan uint64) {
 
 	expectedOffset := uint64(0)
 
-	for offset := range c.updateOffsetCh {
+	for offset := range offsetCh {
 		require.Equal(c.t, expectedOffset, offset)
 		expectedOffset++
 	}
 }
 
-func TestStage_Run(t *testing.T) {
+func TestCollectorRun(t *testing.T) {
 
-	stage := collector.NewStage(newTestCollector(t))
-	require.NotNil(t, stage)
-
-	publishCh, offsetCh, err := stage.Run()
+	publishCh, offsetCh, err := collector.Run(newTestCollector(t))
 	require.NoError(t, err)
 
 	expectedMessageData := uint64(0)

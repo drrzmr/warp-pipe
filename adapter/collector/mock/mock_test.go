@@ -28,14 +28,15 @@ func TestMockCollector(t *testing.T) {
 		logger.Debug("update offset for message", zap.Uint64("offset", offset))
 	}
 
-	mockCollector := mock.New(10, collect, updateOffset)
+	var (
+		collector = mock.New(10, collect, updateOffset)
+		publishCh = make(chan message.Message)
+		offsetCh  = make(chan uint64)
+	)
 
-	publishCh := make(chan message.Message)
-	offsetCh := make(chan uint64)
-
-	mockCollector.Init(publishCh, offsetCh)
-	go mockCollector.Collect()
-	go mockCollector.UpdateOffset()
+	collector.Init()
+	go collector.Collect(publishCh)
+	go collector.UpdateOffset(offsetCh)
 
 	func(publishCh <-chan message.Message, offsetCh chan<- uint64) {
 		defer close(offsetCh)
