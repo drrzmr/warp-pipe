@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"time"
+
 	"go.uber.org/zap"
 
 	"github.com/pagarme/warp-pipe/lib/log"
@@ -49,7 +51,27 @@ func (c *Collector) UpdateOffset(offsetCh <-chan uint64) {
 	logger.Debug("--> UpdateOffset()")
 	defer logger.Debug("<-- UpdateOffset()")
 
-	for offset := range offsetCh {
-		logger.Debug("update offset", zap.Uint64("offset", offset))
+	var (
+		period = c.stream.Config().Streaming.SendStandByStatusPeriod
+		ticker = time.NewTicker(period)
+		offset uint64
+	)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case newOffset, ok := <-offsetCh:
+			if !ok {
+				logger.Info("offsetCh was closed, exiting", zap.Uint64("lastOffset", offset))
+				return
+			}
+
+			if newOffset > offset {
+				offset = newOffset
+			}
+
+		case <-ticker.C:
+			c.stream.SendStandByStatus(offset)
+		}
 	}
 }
