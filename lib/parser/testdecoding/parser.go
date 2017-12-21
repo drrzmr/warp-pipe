@@ -1,12 +1,13 @@
 package testdecoding
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/looplab/fsm"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
+	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/parser/testdecoding/event"
 	"github.com/pagarme/warp-pipe/lib/parser/testdecoding/re"
 	"github.com/pagarme/warp-pipe/lib/parser/testdecoding/state"
@@ -35,6 +36,8 @@ type Operation struct {
 	Type   string
 	Value  string
 }
+
+var logger = log.Development("parser")
 
 // NewParser return a new parser struct
 func NewParser(transactionFunc TransactionFunc) *Parser {
@@ -78,7 +81,11 @@ func NewParser(transactionFunc TransactionFunc) *Parser {
 			},
 			fsm.Callbacks{
 				"enter_state": func(e *fsm.Event) {
-					fmt.Printf("[enter_state] event: %s, src: %s, dst: %s\n", e.Event, e.Src, e.Dst)
+					logger.Debug("enter state",
+						zap.String("event", e.Event),
+						zap.String("src", e.Src),
+						zap.String("dst", e.Dst),
+					)
 				},
 			},
 		),
