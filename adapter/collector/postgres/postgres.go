@@ -3,6 +3,7 @@ package postgres
 import (
 	"time"
 
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/pagarme/warp-pipe/lib/log"
@@ -33,7 +34,10 @@ func (c *Collector) Init() (err error) {
 	logger.Debug("--> Init()")
 	defer logger.Debug("<-- Init()")
 
-	return nil
+	err = c.stream.Connect()
+	logger.ErrorIf(err != nil, "stream connect error", zap.Error(err))
+
+	return errors.WithStack(err)
 }
 
 // Collect method
