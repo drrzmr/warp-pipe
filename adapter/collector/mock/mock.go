@@ -5,9 +5,9 @@ import (
 	"github.com/pagarme/warp-pipe/pipeline/message"
 )
 
-type collectFunc func(c *Collector, messageID uint64, publishCh chan<- message.Message) (end bool)
+type collectFunc func(messageID uint64, publishCh chan<- message.Message) (end bool)
 
-type updateOffsetFunc func(c *Collector, offset uint64)
+type updateOffsetFunc func(offset uint64)
 
 // Collector object
 type Collector struct {
@@ -36,7 +36,7 @@ func (c *Collector) Collect(publishCh chan<- message.Message) {
 
 	for i := uint64(0); i < c.numOfMessages; i++ {
 		var end bool
-		if end = c.collectCb(c, i, publishCh); end {
+		if end = c.collectCb(i, publishCh); end {
 			return
 		}
 	}
@@ -45,6 +45,6 @@ func (c *Collector) Collect(publishCh chan<- message.Message) {
 // UpdateOffset implements method from interface
 func (c *Collector) UpdateOffset(offsetCh <-chan uint64) {
 	for offset := range offsetCh {
-		c.updateOffsetCb(c, offset)
+		c.updateOffsetCb(offset)
 	}
 }
