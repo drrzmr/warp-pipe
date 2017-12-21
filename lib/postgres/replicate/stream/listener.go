@@ -20,8 +20,6 @@ type DefaultEventListener struct {
 	EventListener
 	handler   EventHandler
 	replicate *Replicate
-
-	consumedWalPosition uint64
 }
 
 var listenerLogger = logger.With(zap.String("submodule", "listener"))
@@ -40,18 +38,39 @@ func (d *DefaultEventListener) Run(ctx context.Context) (err error) {
 	listenerLogger.Debug("--> Run()")
 	defer listenerLogger.Debug("<-- Run()")
 
-	err = run(ctx,
-		d.replicate.conn,
-		d.handler,
-		d.replicate.config.Streaming.SendStandByStatusPeriod,
-		d.replicate.config.Streaming.WaitMessageTimeout,
-		&d.consumedWalPosition,
+	var (
+		conn    = d.replicate.conn
+		handler = d.handler
+		timeout = d.replicate.config.Streaming.WaitMessageTimeout
 	)
 
-	return errors.WithStack(err)
+	for {
+		runContext, cancel := context.WithTimeout(ctx, timeout)
+		message, err := conn.WaitForReplicationMessage(runContext)
+		cancel()
+
+		if ignore, err := filterError(message, handler, err); err != nil {
+			return errors.WithStack(err)
+		} else if ignore {
+			continue
+		}
+
+		if isHeartbeat(message) {
+			handler.Heartbeat(message.ServerHeartbeat)
+			continue
+		}
+
+		if isMessage(message) {
+			handler.Message(message.WalMessage)
+			continue
+		}
+
+		handler.Weird(message, err)
+	}
 }
 
-func run(ctx context.Context,
+// Run will be removed on next patch
+func Run(ctx context.Context,
 	conn *pgx.ReplicationConn,
 	handler EventHandler,
 	statusPeriod, messageTimeout time.Duration,
