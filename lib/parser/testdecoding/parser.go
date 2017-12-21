@@ -1,104 +1,201 @@
 package testdecoding
 
 import (
-	"regexp"
+	"fmt"
+	"strconv"
 
 	"github.com/looplab/fsm"
 	"github.com/pkg/errors"
+
+	"github.com/pagarme/warp-pipe/lib/parser/testdecoding/event"
+	"github.com/pagarme/warp-pipe/lib/parser/testdecoding/re"
+	"github.com/pagarme/warp-pipe/lib/parser/testdecoding/state"
 )
+
+// TransactionFunc callback called for new transaction
+type TransactionFunc func(transaction Transaction)
 
 // Parser parser struct
 type Parser struct {
-	fsm *fsm.FSM
-	log []string
+	transaction  *Transaction
+	stateMachine *fsm.FSM
+	callback     TransactionFunc
 }
 
-var (
-	begin  = regexp.MustCompile(`^BEGIN\s\d.+$`)
-	commit = regexp.MustCompile(`^COMMIT\s\d.+$`)
-	op     = regexp.MustCompile(`^table\s\w.+\.\w.+\:\s.*$`)
-)
+// Transaction the transaction itself
+type Transaction struct {
+	Operations []Operation
+	ID         uint64
+}
+
+// Operation the operation unit
+type Operation struct {
+	Schema string
+	Table  string
+	Type   string
+	Value  string
+}
 
 // NewParser return a new parser struct
-func NewParser() *Parser {
-
-	parserStateMachine := fsm.NewFSM(
-		"idle",
-		fsm.Events{
-			{
-				Name: "begin",
-				Src:  []string{"idle"},
-				Dst:  "parsing",
-			}, {
-				Name: "parse",
-				Src:  []string{"parsing"},
-				Dst:  "parsing",
-			}, {
-				Name: "commit",
-				Src:  []string{"parsing"},
-				Dst:  "idle",
-			},
-		},
-		fsm.Callbacks{
-			"begin":  func(e *fsm.Event) {},
-			"parse":  func(e *fsm.Event) {},
-			"commit": func(e *fsm.Event) {},
-		},
-	)
+func NewParser(transactionFunc TransactionFunc) *Parser {
 
 	return &Parser{
-		fsm: parserStateMachine,
+		transaction: nil,
+		callback:    transactionFunc,
+		stateMachine: fsm.NewFSM(
+			state.Idle,
+			fsm.Events{
+				{
+					Name: event.BeginIn,
+					Dst:  state.Start,
+					Src:  []string{state.Idle},
+				},
+				{
+					Name: event.BeginOut,
+					Dst:  state.Started,
+					Src:  []string{state.Start},
+				},
+				{
+					Name: event.OperationIn,
+					Dst:  state.Store,
+					Src:  []string{state.Started, state.Stored},
+				},
+				{
+					Name: event.OperationOut,
+					Dst:  state.Stored,
+					Src:  []string{state.Store},
+				},
+				{
+					Name: event.CommitIn,
+					Dst:  state.Publish,
+					Src:  []string{state.Stored, state.Started},
+				},
+				{
+					Name: event.CommitOut,
+					Dst:  state.Idle,
+					Src:  []string{state.Publish},
+				},
+			},
+			fsm.Callbacks{
+				"enter_state": func(e *fsm.Event) {
+					fmt.Printf("[enter_state] event: %s, src: %s, dst: %s\n", e.Event, e.Src, e.Dst)
+				},
+			},
+		),
 	}
-}
-
-// FSM returns parser FSM
-func (p *Parser) FSM() (fsm *fsm.FSM) {
-	return p.fsm
-}
-
-// Append append log lines
-func (p *Parser) Append(str string) {
-	p.log = append(p.log, str)
-}
-
-// Log returns the log lines to be processed
-func (p *Parser) Log(position uint) (line string, err error) {
-
-	maxPos := uint(len(p.log) - 1)
-	if position > maxPos {
-		return "", errors.Wrapf(ErrInvalidLogPosition, "position: %d, max position: %d", position, maxPos)
-	}
-
-	return p.log[position], nil
 }
 
 // Parse parses log lines
-func (p *Parser) Parse() (t Transaction, err error) {
-	t = Transaction{}
+func (p *Parser) Parse(msg string) (err error) {
 
-	for _, line := range p.log {
-		switch p.fsm.Current() {
-		case "idle":
-			if begin.MatchString(line) {
-				err := p.fsm.Event("begin")
-				if err != nil {
-					return t, errors.Wrap(err, "(begin) transition error")
-				}
-			}
-		case "parsing":
-			if commit.MatchString(line) {
-				err := p.fsm.Event("commit")
-				if err != nil {
-					return t, errors.Wrap(err, "(commit) transition error")
-				}
-			}
-
-			if op.MatchString(line) {
-				operation := NewOperation(line)
-				t.Operations = append(t.Operations, operation)
-			}
-		}
+	if list := re.Operation.FindStringSubmatch(msg); list != nil {
+		err = p.handleOperation(list[1:])
+	} else if list := re.Begin.FindStringSubmatch(msg); list != nil {
+		err = p.handleBegin(list[1:])
+	} else if list := re.Commit.FindStringSubmatch(msg); list != nil {
+		err = p.handleCommit(list[1:])
+	} else {
+		err = errors.Wrapf(ErrInvalidMessage, "message: %s", msg)
 	}
 
-	return t, nil
+	return errors.WithStack(err)
+}
+
+func (p *Parser) handleBegin(list []string) (err error) {
+	if len(list) != 1 {
+		return errors.Wrapf(ErrInvalidFilteredMessage, "filteredMessage: %v", list)
+	}
+
+	if err = p.stateMachine.Event(event.BeginIn); err != nil {
+		return errors.Wrapf(err,
+			"[handleBegin] state: %s, list: %v",
+			p.stateMachine.Current(),
+			list)
+	}
+
+	id, err := strconv.ParseUint(list[0], 10, 64)
+	if err != nil {
+		return errors.Wrapf(err, "could not parse begin id: %s", list[0])
+	}
+
+	p.transaction = &Transaction{
+		ID:         id,
+		Operations: []Operation{},
+	}
+
+	if err = p.stateMachine.Event(event.BeginOut); err != nil {
+		return errors.Wrapf(err,
+			"[handleBegin] state: %s, list: %v",
+			p.stateMachine.Current(),
+			list)
+	}
+
+	return nil
+}
+
+func (p *Parser) handleCommit(list []string) (err error) {
+	if len(list) != 1 {
+		return errors.Wrapf(ErrInvalidFilteredMessage, "filteredMessage: %v", list)
+	}
+
+	if err = p.stateMachine.Event(event.CommitIn); err != nil {
+		return errors.Wrapf(err,
+			"[handleBegin] state: %s, list: %v",
+			p.stateMachine.Current(),
+			list)
+	}
+
+	id, err := strconv.ParseUint(list[0], 10, 64)
+	if err != nil {
+		return errors.Wrapf(err, "could not parse commit id: %s", list[0])
+	}
+
+	if id != p.transaction.ID {
+		return errors.Wrapf(ErrInconsistentTransaction,
+			"begin id: %d, commit id: %d",
+			p.transaction.ID,
+			id,
+		)
+	}
+
+	p.callback(*p.transaction)
+	p.transaction = nil
+
+	if err = p.stateMachine.Event(event.CommitOut); err != nil {
+		return errors.Wrapf(err,
+			"[handleBegin] state: %s, list: %v",
+			p.stateMachine.Current(),
+			list)
+	}
+
+	return nil
+}
+
+func (p *Parser) handleOperation(list []string) (err error) {
+	if len(list) != 4 {
+		return errors.Wrapf(ErrInvalidFilteredMessage, "filteredMessage: %v", list)
+	}
+
+	if err = p.stateMachine.Event(event.OperationIn); err != nil {
+		return errors.Wrapf(err,
+			"[handleBegin] state: %s, list: %v",
+			p.stateMachine.Current(),
+			list)
+	}
+
+	p.transaction.Operations = append(p.transaction.Operations, Operation{
+		Schema: list[0],
+		Table:  list[1],
+		Type:   list[2],
+		Value:  list[3],
+	})
+
+	if err = p.stateMachine.Event(event.OperationOut); err != nil {
+		return errors.Wrapf(err,
+			"[handleBegin] state: %s, list: %v",
+			p.stateMachine.Current(),
+			list)
+	}
+
+	return nil
 }

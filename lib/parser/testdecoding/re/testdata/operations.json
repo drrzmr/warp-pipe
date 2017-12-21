@@ -1,0 +1,68 @@
+[
+    {
+        "begin": true,
+        "message": "BEGIN 627",
+	    "id": 627
+	},
+    {
+        "operation": true,
+        "insert": true,
+        "schema": "public",
+        "table": "table_with_pk",
+        "values": "a[integer]:1 b[character varying]:'Backup and Restore' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'",
+        "message": "table public.table_with_pk: INSERT: a[integer]:1 b[character varying]:'Backup and Restore' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+	},
+    {
+        "operation": true,
+        "insert": true,
+        "table": "table_with_pk",
+        "schema": "public",
+        "values": "a[integer]:2 b[character varying]:'Tuning' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'",
+        "message": "table public.table_with_pk: INSERT: a[integer]:2 b[character varying]:'Tuning' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+	},
+    {
+        "operation": true,
+        "insert": true,
+        "table": "table_with_pk",
+        "schema": "public",
+        "values": "a[integer]:3 b[character varying]:'Replication' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'",
+        "message": "table public.table_with_pk: INSERT: a[integer]:3 b[character varying]:'Replication' c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+	},
+    {
+        "operation": true,
+        "delete": true,
+        "table": "table_with_pk",
+        "schema": "public",
+        "values": "a[integer]:1 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'",
+        "message": "table public.table_with_pk: DELETE: a[integer]:1 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+	},
+    {
+        "operation": true,
+        "delete": true,
+        "table": "table_with_pk",
+        "schema": "public",
+        "values": "a[integer]:2 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'",
+        "message": "table public.table_with_pk: DELETE: a[integer]:2 c[timestamp without time zone]:'2017-11-30 17:59:33.825033'"
+    },
+    {
+        "operation": true,
+        "insert": true,
+        "table": "table_without_pk",
+        "schema": "public",
+        "values": "a[integer]:1 b[numeric]:2.34 c[text]:'Tapir'",
+        "message": "table public.table_without_pk: INSERT: a[integer]:1 b[numeric]:2.34 c[text]:'Tapir'"
+    },
+    {
+        "operation": true,
+        "update": true,
+        "table": "table_without_pk",
+        "schema": "public",
+        "values": "a[integer]:1 b[numeric]:2.34 c[text]:'Anta'",
+        "message": "table public.table_without_pk: UPDATE: a[integer]:1 b[numeric]:2.34 c[text]:'Anta'"
+	},
+    {
+        "commit": true,
+        "message": "COMMIT 627",
+        "id": 627
+	}
+]

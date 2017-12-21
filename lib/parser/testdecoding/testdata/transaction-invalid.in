@@ -1,0 +1,8 @@
+BEGIN 627
+table public.table_without_pk: INSERT: a[integer]:1 b[numeric]:2.34 c[text]:'Tapir'
+table public.table_without_pk: UPDATE: a[integer]:1 b[numeric]:2.34 c[text]:'Anta'
+
+
+
+
+

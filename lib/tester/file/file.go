@@ -2,6 +2,7 @@ package file
 
 import (
 	"bufio"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -31,6 +32,19 @@ func Load(t *testing.T, filename string) (text string) {
 	}
 
 	return text
+}
+
+// LoadJSON loads filename from testdata directory
+func LoadJSON(t *testing.T, filename string, i interface{}) {
+	t.Helper()
+
+	fn := fmt.Sprintf("%s.%s", filename, Config.JSONExtension)
+	path := filepath.Join("testdata", fn)
+	buf, err := ioutil.ReadFile(path)
+	require.NoError(t, err)
+	require.NotNil(t, buf)
+
+	json.Unmarshal(buf, i)
 }
 
 // Store text into filename using Config.OutputExtension
