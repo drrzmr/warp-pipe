@@ -100,6 +100,21 @@ func (r *Replicate) Start(ctx context.Context, listener EventListener) (started 
 	return true, nil
 }
 
+// SendStandByStatus method
+func (r *Replicate) SendStandByStatus(position uint64) (err error) {
+
+	var status *pgx.StandbyStatus
+
+	if status, err = pgx.NewStandbyStatus(position); err != nil {
+		return errors.Wrapf(err, "create new standby status object failed, position: %d", position)
+	}
+
+	err = r.conn.SendStandbyStatus(status)
+	logger.DebugIf(err == nil, "sent standby status", zap.Uint64("position", position))
+
+	return errors.Wrapf(err, "send stand by status failed, position: %d", position)
+}
+
 func (r *Replicate) isConnected() (connected bool) {
 
 	return r.conn != nil
