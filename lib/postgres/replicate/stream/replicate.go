@@ -115,15 +115,8 @@ func (r *Replicate) SendStandByStatus(position uint64) (err error) {
 	return errors.Wrapf(err, "send stand by status failed, position: %d", position)
 }
 
-func (r *Replicate) isConnected() (connected bool) {
-
-	return r.conn != nil
-}
-
-func (r *Replicate) isStarted() (connected bool) {
-
-	return r.listener != nil
-}
+func (r *Replicate) isConnected() (connected bool) { return r.conn != nil }
+func (r *Replicate) isStarted() (started bool)     { return r.listener != nil }
 
 func (r *Replicate) connect() (err error) {
 
