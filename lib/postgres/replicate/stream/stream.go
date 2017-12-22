@@ -98,18 +98,21 @@ func (s *Stream) Start() (err error) {
 // SendStandByStatus method
 func (s *Stream) SendStandByStatus(position uint64) (err error) {
 
-	var status *pgx.StandbyStatus
+	var (
+		status *pgx.StandbyStatus
+		p      = pgx.FormatLSN(position)
+	)
 
 	if status, err = pgx.NewStandbyStatus(position); err != nil {
-		return errors.Wrapf(err, "create new standby status object failed, position: %d", position)
+		return errors.Wrapf(err, "create new standby status object failed, position: %s", p)
 	}
 
 	err = s.conn.SendStandbyStatus(status)
 	if err == nil {
-		logger.Debug("sent standby status", zap.Uint64("position", position))
+		logger.Debug("sent standby status", zap.String("position", p))
 	}
 
-	return errors.Wrapf(err, "send stand by status failed, position: %d", position)
+	return errors.Wrapf(err, "send stand by status failed, position: %s", p)
 }
 
 func (s *Stream) isConnected() (connected bool) { return s.conn != nil }
