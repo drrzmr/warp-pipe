@@ -15,13 +15,13 @@ import (
 // Collector object
 type Collector struct {
 	collector.Collector
-	stream *stream.Replicate
+	stream *stream.Stream
 }
 
 var logger = log.Development("collector")
 
 // New create a new collector
-func New(stream *stream.Replicate) *Collector {
+func New(stream *stream.Stream) *Collector {
 
 	return &Collector{
 		stream: stream,

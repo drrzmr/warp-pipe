@@ -46,10 +46,10 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 
 		var err error
 
-		r := stream.New(postgresConfig)
-		require.NotNil(t, r)
+		s := stream.New(postgresConfig)
+		require.NotNil(t, s)
 
-		err = r.Connect()
+		err = s.Connect()
 		require.NoError(t, err)
 
 		ctx, cancel := context.WithCancel(context.Background())
@@ -60,7 +60,7 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 			cancel()
 		})
 
-		started, err := r.Start(ctx, r.NewDefaultEventListener(handler.MockEventHandler))
+		started, err := s.Start(ctx, s.NewDefaultEventListener(handler.MockEventHandler))
 		require.Error(t, err)
 		require.Equal(t, context.Canceled, errors.Cause(err))
 		require.False(t, started)
