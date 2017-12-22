@@ -14,7 +14,7 @@ var logger = log.Development("test")
 
 func TestMockCollector(t *testing.T) {
 
-	collect := func(c *mock.Collector, messageID uint64, publishCh chan<- message.Message) (end bool) {
+	collect := func(messageID uint64, publishCh chan<- message.Message) (end bool) {
 
 		publishCh <- message.New(message.Payload{
 			"data": messageID,
@@ -23,19 +23,20 @@ func TestMockCollector(t *testing.T) {
 		return false
 	}
 
-	updateOffset := func(c *mock.Collector, offset uint64) {
+	updateOffset := func(offset uint64) {
 
 		logger.Debug("update offset for message", zap.Uint64("offset", offset))
 	}
 
-	mockCollector := mock.New(10, collect, updateOffset)
+	var (
+		collector = mock.New(10, collect, updateOffset)
+		publishCh = make(chan message.Message)
+		offsetCh  = make(chan uint64)
+	)
 
-	publishCh := make(chan message.Message)
-	offsetCh := make(chan uint64)
-
-	mockCollector.Init(publishCh, offsetCh)
-	go mockCollector.Collect()
-	go mockCollector.UpdateOffset()
+	collector.Init()
+	go collector.Collect(publishCh)
+	go collector.UpdateOffset(offsetCh)
 
 	func(publishCh <-chan message.Message, offsetCh chan<- uint64) {
 		defer close(offsetCh)
