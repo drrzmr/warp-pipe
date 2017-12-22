@@ -60,7 +60,7 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 			cancel()
 		})
 
-		started, err := r.Start(ctx, stream.NewDefaultEventListener(r, handler.MockEventHandler))
+		started, err := r.Start(ctx, r.NewDefaultEventListener(handler.MockEventHandler))
 		require.Error(t, err)
 		require.Equal(t, context.Canceled, errors.Cause(err))
 		require.False(t, started)

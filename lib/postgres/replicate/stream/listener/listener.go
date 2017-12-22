@@ -1,12 +1,14 @@
-package stream
+package listener
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx"
-	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream/handler"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
+
+	"github.com/pagarme/warp-pipe/lib/log"
+	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream/handler"
 )
 
 // EventListener interface
@@ -17,54 +19,50 @@ type EventListener interface {
 // DefaultEventListener object
 type DefaultEventListener struct {
 	EventListener
-	handler   handler.EventHandler
-	replicate *Replicate
+	handler handler.EventHandler
+	conn    *pgx.ReplicationConn
+	timeout time.Duration
 }
 
-var listenerLogger = logger.With(zap.String("submodule", "listener"))
+var logger = log.Development("listener")
 
 // NewDefaultEventListener simple event listener mock
-func NewDefaultEventListener(replicate *Replicate, handler handler.EventHandler) EventListener {
+func NewDefaultEventListener(conn *pgx.ReplicationConn, timeout time.Duration, h handler.EventHandler) EventListener {
 	return &DefaultEventListener{
-		handler:   handler,
-		replicate: replicate,
+		handler: h,
+		conn:    conn,
+		timeout: timeout,
 	}
 }
 
 // Run start listener execution
 func (d *DefaultEventListener) Run(ctx context.Context) (err error) {
 
-	listenerLogger.Debug("--> Run()")
-	defer listenerLogger.Debug("<-- Run()")
-
-	var (
-		conn    = d.replicate.conn
-		handler = d.handler
-		timeout = d.replicate.config.Streaming.WaitMessageTimeout
-	)
+	logger.Debug("--> Run()")
+	defer logger.Debug("<-- Run()")
 
 	for {
-		runContext, cancel := context.WithTimeout(ctx, timeout)
-		message, err := conn.WaitForReplicationMessage(runContext)
+		runContext, cancel := context.WithTimeout(ctx, d.timeout)
+		message, err := d.conn.WaitForReplicationMessage(runContext)
 		cancel()
 
-		if ignore, err := filterError(message, handler, err); err != nil {
+		if ignore, err := filterError(message, d.handler, err); err != nil {
 			return errors.WithStack(err)
 		} else if ignore {
 			continue
 		}
 
 		if isHeartbeat(message) {
-			handler.Heartbeat(message.ServerHeartbeat)
+			d.handler.Heartbeat(message.ServerHeartbeat)
 			continue
 		}
 
 		if isMessage(message) {
-			handler.Message(message.WalMessage)
+			d.handler.Message(message.WalMessage)
 			continue
 		}
 
-		handler.Weird(message, err)
+		d.handler.Weird(message, err)
 	}
 }
 

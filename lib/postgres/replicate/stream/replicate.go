@@ -8,6 +8,8 @@ import (
 
 	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres"
+	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream/handler"
+	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream/listener"
 	"go.uber.org/zap"
 )
 
@@ -23,7 +25,7 @@ var logger = log.Development("replicate")
 type Replicate struct {
 	config   postgres.Config
 	conn     *pgx.ReplicationConn
-	listener EventListener
+	listener listener.EventListener
 }
 
 // New create a Replicate object
@@ -39,6 +41,12 @@ func New(config postgres.Config) *Replicate {
 // Config return the address of Database config object
 func (r *Replicate) Config() *postgres.Config {
 	return &r.config
+}
+
+// NewDefaultEventListener return new default listener
+func (r *Replicate) NewDefaultEventListener(h handler.EventHandler) listener.EventListener {
+
+	return listener.NewDefaultEventListener(r.conn, r.config.Streaming.WaitMessageTimeout, h)
 }
 
 // Connect to postgres
@@ -66,7 +74,7 @@ func (r *Replicate) Connect() (err error) {
 }
 
 // Start replication
-func (r *Replicate) Start(ctx context.Context, listener EventListener) (started bool, err error) {
+func (r *Replicate) Start(ctx context.Context, listener listener.EventListener) (started bool, err error) {
 
 	logger.Debug("--> Start()")
 	defer logger.Debug("<-- Start()")
