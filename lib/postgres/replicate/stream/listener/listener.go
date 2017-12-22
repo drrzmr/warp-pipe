@@ -4,5 +4,5 @@ import "context"
 
 // EventListener interface
 type EventListener interface {
-	Run(ctx context.Context) (err error)
+	Listen(ctx context.Context) (err error)
 }

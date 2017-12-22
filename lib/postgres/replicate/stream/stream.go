@@ -96,7 +96,7 @@ func (s *Stream) Start(ctx context.Context, listener listener.EventListener) (st
 
 	s.listener = listener
 
-	if err = s.listener.Run(ctx); err != nil {
+	if err = s.listener.Listen(ctx); err != nil {
 
 		// filter context canceled
 		canceled := errors.Cause(err) == context.Canceled

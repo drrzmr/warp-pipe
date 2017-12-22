@@ -30,8 +30,8 @@ func NewDefaultEventListener(conn *pgx.ReplicationConn, timeout time.Duration, h
 	}
 }
 
-// Run start listener execution
-func (d *DefaultEventListener) Run(ctx context.Context) (err error) {
+// Listen start listener execution
+func (d *DefaultEventListener) Listen(ctx context.Context) (err error) {
 
 	logger.Debug("--> Run()")
 	defer logger.Debug("<-- Run()")
