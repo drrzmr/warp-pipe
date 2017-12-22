@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/pagarme/warp-pipe/adapter/collector/postgres/handler"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -36,8 +37,18 @@ func (c *Collector) Init(ctx context.Context) (err error) {
 	logger.Debug("--> Init()")
 	defer logger.Debug("<-- Init()")
 
+	if c.isInitialized() {
+		logger.Warn("already initialized")
+		return nil
+	}
+
 	if err = c.stream.Connect(); err != nil {
 		logger.Error("stream connect error", zap.Error(err))
+		return errors.WithStack(err)
+	}
+
+	if err = c.stream.Start(); err != nil {
+		logger.Error("stream start error", zap.Error(err))
 		return errors.WithStack(err)
 	}
 
@@ -52,6 +63,14 @@ func (c *Collector) Collect(publishCh chan<- message.Message) {
 	defer logger.Debug("<-- Collect()")
 
 	defer close(publishCh)
+
+	var (
+		handler  = handler.New(publishCh)
+		listener = c.stream.NewDefaultEventListener(handler)
+	)
+
+	err := listener.Listen(c.ctx)
+	logger.Info("<-- Collect()", zap.Error(err))
 }
 
 // UpdateOffset method
@@ -88,3 +107,5 @@ func (c *Collector) UpdateOffset(offsetCh <-chan uint64) {
 		}
 	}
 }
+
+func (c *Collector) isInitialized() (initialized bool) { return c.ctx != nil }
