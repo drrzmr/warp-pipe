@@ -1,8 +1,6 @@
 package stream
 
 import (
-	"context"
-
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
 
@@ -74,7 +72,7 @@ func (s *Stream) Connect() (err error) {
 }
 
 // Start replication
-func (s *Stream) Start(ctx context.Context, listener listener.EventListener) (err error) {
+func (s *Stream) Start() (err error) {
 
 	logger.Debug("--> Start()")
 	defer logger.Debug("<-- Start()")
@@ -89,17 +87,8 @@ func (s *Stream) Start(ctx context.Context, listener listener.EventListener) (er
 		return nil
 	}
 
-	if s.started, err = s.start(); err != nil {
-		logger.Error("start error")
-		return errors.WithStack(err)
-	}
-
-	err = listener.Listen(ctx)
-
-	// filter context canceled
-	canceled := errors.Cause(err) == context.Canceled
-	logger.DebugIf(canceled, "context canceled")
-	logger.ErrorIf(!canceled, "listener run", zap.Error(err))
+	s.started, err = s.start()
+	logger.ErrorIf(err != nil, "start error", zap.Error(err))
 	return errors.WithStack(err)
 }
 
