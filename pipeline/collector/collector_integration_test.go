@@ -3,6 +3,7 @@ package collector_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/jackc/pgx"
 	"github.com/stretchr/testify/require"
@@ -44,7 +45,7 @@ CREATE TABLE test
 
 	t.Run("BuildStage", func(t *testing.T) {
 
-		ctx := context.Background()
+		ctx, cancel := context.WithCancel(context.Background())
 		publishCh, offsetCh, err := collector.Run(ctx, postgres.New(stream.New(postgresConfig)))
 		require.NoError(t, err)
 
@@ -55,6 +56,11 @@ CREATE TABLE test
 			done     = make(chan struct{})
 			commitCh = make(chan uint64)
 		)
+
+		time.AfterFunc(10*time.Second, func() {
+			logger.Debug("canceling...")
+			cancel()
+		})
 
 		go func() {
 			for msg := range publishCh {

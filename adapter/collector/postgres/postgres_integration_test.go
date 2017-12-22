@@ -3,6 +3,7 @@ package postgres_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -29,9 +30,14 @@ func TestIntegrationPostgresAdapter(t *testing.T) {
 		publishCh      = make(chan message.Message)
 		offsetCh       = make(chan uint64)
 		done           = make(chan struct{})
-		ctx            = context.Background()
+		ctx, cancel    = context.WithCancel(context.Background())
 	)
 	defer deferFn()
+
+	time.AfterFunc(10*time.Second, func() {
+		logger.Debug("canceling...")
+		cancel()
+	})
 
 	collector.Init(ctx)
 	go collector.Collect(publishCh)
