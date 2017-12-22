@@ -23,18 +23,18 @@ var logger = log.Development("stream")
 
 // Stream object
 type Stream struct {
-	config   postgres.Config
-	conn     *pgx.ReplicationConn
-	listener listener.EventListener
+	config  postgres.Config
+	conn    *pgx.ReplicationConn
+	started bool
 }
 
 // New create a Replicate object
 func New(config postgres.Config) *Stream {
 
 	return &Stream{
-		config:   config,
-		conn:     nil,
-		listener: nil,
+		config:  config,
+		conn:    nil,
+		started: false,
 	}
 }
 
@@ -89,14 +89,12 @@ func (s *Stream) Start(ctx context.Context, listener listener.EventListener) (st
 		return false, nil
 	}
 
-	if err = s.start(); err != nil {
+	if s.started, err = s.start(); err != nil {
 		logger.Error("start error")
 		return false, errors.WithStack(err)
 	}
 
-	s.listener = listener
-
-	if err = s.listener.Listen(ctx); err != nil {
+	if err = listener.Listen(ctx); err != nil {
 
 		// filter context canceled
 		canceled := errors.Cause(err) == context.Canceled
@@ -124,7 +122,7 @@ func (s *Stream) SendStandByStatus(position uint64) (err error) {
 }
 
 func (s *Stream) isConnected() (connected bool) { return s.conn != nil }
-func (s *Stream) isStarted() (started bool)     { return s.listener != nil }
+func (s *Stream) isStarted() (started bool)     { return s.started }
 
 func (s *Stream) connect() (err error) {
 
@@ -163,10 +161,11 @@ func (s *Stream) createSlot() (err error) {
 	)
 }
 
-func (s *Stream) start() (err error) {
+func (s *Stream) start() (started bool, err error) {
 
 	err = s.conn.StartReplication(s.config.Replicate.Slot, startLsn, timeLine, pluginArgs)
-	return errors.Wrapf(err,
+	started = err == nil
+	return started, errors.Wrapf(err,
 		"Something wrong with start replication, slot: %s, startLsn: %d, timeLine: %d, pluginArgs: %s",
 		s.config.Replicate.Slot,
 		startLsn,
