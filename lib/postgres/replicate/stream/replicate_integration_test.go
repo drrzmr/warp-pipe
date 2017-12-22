@@ -12,6 +12,7 @@ import (
 	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream"
+	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream/handler"
 	postgresTester "github.com/pagarme/warp-pipe/lib/tester/postgres"
 )
 
@@ -59,7 +60,7 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 			cancel()
 		})
 
-		started, err := r.Start(ctx, stream.NewDefaultEventListener(r, stream.MockEventHandler))
+		started, err := r.Start(ctx, stream.NewDefaultEventListener(r, handler.MockEventHandler))
 		require.Error(t, err)
 		require.Equal(t, context.Canceled, errors.Cause(err))
 		require.False(t, started)

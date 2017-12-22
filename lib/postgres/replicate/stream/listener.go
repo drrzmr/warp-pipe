@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx"
+	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream/handler"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -16,14 +17,14 @@ type EventListener interface {
 // DefaultEventListener object
 type DefaultEventListener struct {
 	EventListener
-	handler   EventHandler
+	handler   handler.EventHandler
 	replicate *Replicate
 }
 
 var listenerLogger = logger.With(zap.String("submodule", "listener"))
 
 // NewDefaultEventListener simple event listener mock
-func NewDefaultEventListener(replicate *Replicate, handler EventHandler) EventListener {
+func NewDefaultEventListener(replicate *Replicate, handler handler.EventHandler) EventListener {
 	return &DefaultEventListener{
 		handler:   handler,
 		replicate: replicate,
@@ -67,10 +68,10 @@ func (d *DefaultEventListener) Run(ctx context.Context) (err error) {
 	}
 }
 
-func filterError(message *pgx.ReplicationMessage, handler EventHandler, inErr error) (ignore bool, outErr error) {
+func filterError(message *pgx.ReplicationMessage, h handler.EventHandler, inErr error) (ignore bool, outErr error) {
 
 	if isTimeout(inErr) {
-		handler.WaitTimeout()
+		h.WaitTimeout()
 		return true, nil
 	}
 
@@ -79,12 +80,12 @@ func filterError(message *pgx.ReplicationMessage, handler EventHandler, inErr er
 	}
 
 	if isEOF(inErr) {
-		handler.EOF()
+		h.EOF()
 		return false, errors.Wrap(inErr, "end of postgres stream messages")
 	}
 
 	if isWeird(message, inErr) {
-		handler.Weird(message, inErr)
+		h.Weird(message, inErr)
 		return true, nil
 	}
 
