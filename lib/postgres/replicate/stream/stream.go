@@ -74,36 +74,33 @@ func (s *Stream) Connect() (err error) {
 }
 
 // Start replication
-func (s *Stream) Start(ctx context.Context, listener listener.EventListener) (started bool, err error) {
+func (s *Stream) Start(ctx context.Context, listener listener.EventListener) (err error) {
 
 	logger.Debug("--> Start()")
 	defer logger.Debug("<-- Start()")
 
 	if !s.isConnected() {
 		logger.Error("not connected")
-		return false, nil
+		return nil
 	}
 
 	if s.isStarted() {
 		logger.Error("already started")
-		return false, nil
+		return nil
 	}
 
 	if s.started, err = s.start(); err != nil {
 		logger.Error("start error")
-		return false, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
-	if err = listener.Listen(ctx); err != nil {
+	err = listener.Listen(ctx)
 
-		// filter context canceled
-		canceled := errors.Cause(err) == context.Canceled
-		logger.DebugIf(canceled, "context canceled")
-		logger.ErrorIf(!canceled, "listener run", zap.Error(err))
-		return false, errors.WithStack(err)
-	}
-
-	return true, nil
+	// filter context canceled
+	canceled := errors.Cause(err) == context.Canceled
+	logger.DebugIf(canceled, "context canceled")
+	logger.ErrorIf(!canceled, "listener run", zap.Error(err))
+	return errors.WithStack(err)
 }
 
 // SendStandByStatus method
