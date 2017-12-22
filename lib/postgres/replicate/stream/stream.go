@@ -87,9 +87,12 @@ func (s *Stream) Start() (err error) {
 		return nil
 	}
 
-	s.started, err = s.start()
-	logger.ErrorIf(err != nil, "start error", zap.Error(err))
-	return errors.WithStack(err)
+	if s.started, err = s.start(); err != nil {
+		logger.Error("start error", zap.Error(err))
+		return errors.WithStack(err)
+	}
+
+	return nil
 }
 
 // SendStandByStatus method
@@ -102,7 +105,9 @@ func (s *Stream) SendStandByStatus(position uint64) (err error) {
 	}
 
 	err = s.conn.SendStandbyStatus(status)
-	logger.DebugIf(err == nil, "sent standby status", zap.Uint64("position", position))
+	if err == nil {
+		logger.Debug("sent standby status", zap.Uint64("position", position))
+	}
 
 	return errors.Wrapf(err, "send stand by status failed, position: %d", position)
 }
