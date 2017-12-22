@@ -1,6 +1,7 @@
 package postgres_test
 
 import (
+	"context"
 	"testing"
 
 	"go.uber.org/zap"
@@ -28,10 +29,11 @@ func TestIntegrationPostgresAdapter(t *testing.T) {
 		publishCh      = make(chan message.Message)
 		offsetCh       = make(chan uint64)
 		done           = make(chan struct{})
+		ctx            = context.Background()
 	)
 	defer deferFn()
 
-	collector.Init()
+	collector.Init(ctx)
 	go collector.Collect(publishCh)
 	go collector.UpdateOffset(offsetCh)
 	go func(publishCh <-chan message.Message, offsetCh chan<- uint64) {

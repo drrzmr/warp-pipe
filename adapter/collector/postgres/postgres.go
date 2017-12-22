@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"time"
 
 	"github.com/pkg/errors"
@@ -16,6 +17,7 @@ import (
 type Collector struct {
 	collector.Collector
 	stream *stream.Stream
+	ctx    context.Context
 }
 
 var logger = log.Development("collector")
@@ -29,15 +31,18 @@ func New(stream *stream.Stream) *Collector {
 }
 
 // Init method
-func (c *Collector) Init() (err error) {
+func (c *Collector) Init(ctx context.Context) (err error) {
 
 	logger.Debug("--> Init()")
 	defer logger.Debug("<-- Init()")
 
-	err = c.stream.Connect()
-	logger.ErrorIf(err != nil, "stream connect error", zap.Error(err))
+	if err = c.stream.Connect(); err != nil {
+		logger.Error("stream connect error", zap.Error(err))
+		return errors.WithStack(err)
+	}
 
-	return errors.WithStack(err)
+	c.ctx = ctx
+	return nil
 }
 
 // Collect method
@@ -73,6 +78,10 @@ func (c *Collector) UpdateOffset(offsetCh <-chan uint64) {
 			if newOffset > offset {
 				offset = newOffset
 			}
+
+		case <-c.ctx.Done():
+			logger.Info("canceled, exiting...", zap.Error(c.ctx.Err()))
+			return
 
 		case <-ticker.C:
 			c.stream.SendStandByStatus(offset)

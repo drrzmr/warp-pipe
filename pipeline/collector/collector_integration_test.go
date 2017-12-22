@@ -1,6 +1,7 @@
 package collector_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/jackc/pgx"
@@ -43,7 +44,8 @@ CREATE TABLE test
 
 	t.Run("BuildStage", func(t *testing.T) {
 
-		publishCh, offsetCh, err := collector.Run(postgres.New(stream.New(postgresConfig)))
+		ctx := context.Background()
+		publishCh, offsetCh, err := collector.Run(ctx, postgres.New(stream.New(postgresConfig)))
 		require.NoError(t, err)
 
 		_, err = normalDB.Exec("INSERT INTO test (name, ts) VALUES ('test1', now());")
