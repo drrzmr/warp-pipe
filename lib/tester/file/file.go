@@ -44,7 +44,8 @@ func LoadJSON(t *testing.T, filename string, i interface{}) {
 	require.NoError(t, err)
 	require.NotNil(t, buf)
 
-	json.Unmarshal(buf, i)
+	err = json.Unmarshal(buf, i)
+	require.NoError(t, err)
 }
 
 // Store text into filename using Config.OutputExtension

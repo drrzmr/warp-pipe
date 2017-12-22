@@ -10,5 +10,5 @@ var (
 	// ErrInconsistentTransaction returned for inconsistent transaction
 	ErrInconsistentTransaction = errors.New("inconsistent transaction")
 	// ErrInvalidFilteredMessage returned for invalid message
-	ErrInvalidFilteredMessage = errors.New("invalid message")
+	ErrInvalidFilteredMessage = errors.New("invalid filtered message")
 )
