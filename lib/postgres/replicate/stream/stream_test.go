@@ -13,10 +13,10 @@ func TestStreamReplicate(t *testing.T) {
 
 	t.Run("Config", func(t *testing.T) {
 
-		r := stream.New(postgres.Config{})
-		require.NotNil(t, r)
+		s := stream.New(postgres.Config{})
+		require.NotNil(t, s)
 
-		config := r.Config()
+		config := s.Config()
 		require.NotNil(t, config)
 	})
 }
