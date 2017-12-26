@@ -1,7 +1,7 @@
 package producer
 
 import (
-	"github.com/pagarme/warp-pipe/producer"
+	"github.com/pagarme/warp-pipe/lib/snippet/producer"
 	"github.com/spf13/cobra"
 )
 

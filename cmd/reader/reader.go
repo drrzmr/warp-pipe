@@ -2,7 +2,7 @@ package reader
 
 import (
 	"github.com/pagarme/warp-pipe/config"
-	"github.com/pagarme/warp-pipe/reader"
+	"github.com/pagarme/warp-pipe/lib/snippet/reader"
 	"github.com/spf13/cobra"
 )
 
