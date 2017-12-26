@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/pagarme/warp-pipe/adapter/collector/postgres/handler"
+	"github.com/pagarme/warp-pipe/lib/postgres"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -24,10 +25,10 @@ type Collector struct {
 var logger = log.Development("collector")
 
 // New create a new collector
-func New(stream *stream.Stream) *Collector {
+func New(postgresConfig postgres.Config) *Collector {
 
 	return &Collector{
-		stream: stream,
+		stream: stream.New(postgresConfig),
 	}
 }
 
