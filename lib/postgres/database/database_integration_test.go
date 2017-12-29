@@ -33,7 +33,7 @@ func TestDatabaseIntegration(t *testing.T) {
 			Database: "database",
 			SQL: postgres.SQLConfig{
 				Driver:         "pgx",
-				ConnectTimeout: postgres.MinConnectTimeout,
+				ConnectTimeout: postgres.DefaultConnectTimeout,
 			},
 		})
 
@@ -62,7 +62,7 @@ func TestDatabaseIntegration(t *testing.T) {
 			Password: "postgres",
 			SQL: postgres.SQLConfig{
 				Driver:         "pgx",
-				ConnectTimeout: postgres.MinConnectTimeout,
+				ConnectTimeout: postgres.DefaultConnectTimeout,
 			},
 		})
 
@@ -93,7 +93,7 @@ func TestDatabaseIntegration(t *testing.T) {
 			Password: "postgres",
 			SQL: postgres.SQLConfig{
 				Driver:                   "pgx",
-				ConnectTimeout:           postgres.MinConnectTimeout,
+				ConnectTimeout:           postgres.DefaultConnectTimeout,
 				CreateDatabaseIfNotExist: true,
 			},
 		})

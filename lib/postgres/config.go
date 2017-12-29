@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	// MinConnectTimeout min timeout necessary for connect
-	MinConnectTimeout = 1 * time.Second
+	// DefaultConnectTimeout min timeout necessary for connect
+	DefaultConnectTimeout = 5 * time.Second
 	// DefaultPort for postgres
 	DefaultPort = 5432
 	// DefaultUser for postgres
