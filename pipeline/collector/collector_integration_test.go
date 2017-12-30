@@ -2,21 +2,18 @@ package collector_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/jackc/pgx"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 
 	postgresCollector "github.com/pagarme/warp-pipe/adapter/collector/postgres"
-	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate"
 	postgresTester "github.com/pagarme/warp-pipe/lib/tester/postgres"
 	"github.com/pagarme/warp-pipe/pipeline/collector"
+	"github.com/stretchr/testify/require"
 )
-
-var logger = log.Development("test")
 
 func TestIntegrationPostgresCollector(t *testing.T) {
 	if testing.Short() {
@@ -57,16 +54,14 @@ CREATE TABLE test
 		)
 
 		time.AfterFunc(10*time.Second, func() {
-			logger.Debug("canceling...")
+			fmt.Println("canceling...")
 			cancel()
 		})
 
 		go func() {
 			for msg := range publishCh {
 				eventData := string(msg.Get("WalData").([]byte))
-				logger.Debug("event",
-					zap.String("data", eventData),
-				)
+				fmt.Println("event, data:", eventData)
 
 				commitCh <- msg.Get("WalStart").(uint64)
 			}
@@ -75,9 +70,9 @@ CREATE TABLE test
 
 		go func() {
 			for offset := range commitCh {
-				logger.Debug("--> commit", zap.String("offset", pgx.FormatLSN(offset)))
+				fmt.Println("--> commit, offset", pgx.FormatLSN(offset))
 				offsetCh <- offset
-				logger.Debug("<-- commit", zap.String("offset", pgx.FormatLSN(offset)))
+				fmt.Println("<-- commit, offset", pgx.FormatLSN(offset))
 			}
 
 			close(offsetCh)

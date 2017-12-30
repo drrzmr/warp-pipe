@@ -2,19 +2,15 @@ package postgres_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
-	"go.uber.org/zap"
-
 	"github.com/pagarme/warp-pipe/adapter/collector/postgres"
-	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate"
 	tester "github.com/pagarme/warp-pipe/lib/tester/postgres"
 	"github.com/pagarme/warp-pipe/pipeline/message"
 )
-
-var logger = log.Development("test")
 
 func TestIntegrationPostgresAdapter(t *testing.T) {
 	if testing.Short() {
@@ -34,7 +30,7 @@ func TestIntegrationPostgresAdapter(t *testing.T) {
 	defer deferFn()
 
 	time.AfterFunc(10*time.Second, func() {
-		logger.Debug("canceling...")
+		fmt.Println("canceling...")
 		cancel()
 	})
 
@@ -46,9 +42,7 @@ func TestIntegrationPostgresAdapter(t *testing.T) {
 		defer close(done)
 
 		for msg := range publishCh {
-			logger.Debug("new message",
-				zap.Time("timestamp", msg.Timestamp()),
-			)
+			fmt.Println("new message, timestamp:", msg.Timestamp())
 			offsetCh <- 0
 		}
 	}(publishCh, offsetCh)
