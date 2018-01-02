@@ -1,4 +1,4 @@
-package message
+package pipeline
 
 import "time"
 
@@ -11,8 +11,8 @@ type Message struct {
 	payload   Payload
 }
 
-// New return new message with given payload
-func New(payload Payload) Message {
+// NewMessage return new message with given payload
+func NewMessage(payload Payload) Message {
 	return Message{
 		timestamp: time.Now(),
 		payload:   payload,

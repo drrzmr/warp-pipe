@@ -3,17 +3,16 @@ package mock
 import (
 	"context"
 
-	"github.com/pagarme/warp-pipe/pipeline/collector"
-	"github.com/pagarme/warp-pipe/pipeline/message"
+	"github.com/pagarme/warp-pipe/pipeline"
 )
 
-type collectFunc func(messageID uint64, publishCh chan<- message.Message) (end bool)
+type collectFunc func(messageID uint64, publishCh chan<- pipeline.Message) (end bool)
 
 type updateOffsetFunc func(offset uint64)
 
 // Collector object
 type Collector struct {
-	collector.Collector
+	pipeline.Collector
 	numOfMessages  uint64
 	collectCb      collectFunc
 	updateOffsetCb updateOffsetFunc
@@ -33,7 +32,7 @@ func New(numberOfMessages uint64, collectCb collectFunc, updateOffsetCb updateOf
 func (c *Collector) Init(ctx context.Context) (err error) { return nil }
 
 // Collect implements method from interface
-func (c *Collector) Collect(publishCh chan<- message.Message) {
+func (c *Collector) Collect(publishCh chan<- pipeline.Message) {
 	defer close(publishCh)
 
 	for i := uint64(0); i < c.numOfMessages; i++ {

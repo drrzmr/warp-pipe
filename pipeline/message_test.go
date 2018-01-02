@@ -1,12 +1,11 @@
-package message_test
+package pipeline_test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/pagarme/warp-pipe/pipeline"
 	"github.com/stretchr/testify/require"
-
-	"github.com/pagarme/warp-pipe/pipeline/message"
 )
 
 func TestMessage(t *testing.T) {
@@ -21,7 +20,7 @@ func TestMessage(t *testing.T) {
 		{"Invalid", false, "nilKey", ""},
 	}
 
-	payload := message.Payload{}
+	payload := pipeline.Payload{}
 	for _, testData := range testTable {
 		if !testData.use {
 			continue
@@ -29,7 +28,7 @@ func TestMessage(t *testing.T) {
 		payload[testData.key] = testData.value
 	}
 
-	m := message.New(payload)
+	m := pipeline.NewMessage(payload)
 	require.NotNil(t, m)
 	require.True(t, m.Timestamp().Before(time.Now()))
 

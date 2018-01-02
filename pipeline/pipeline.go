@@ -1,24 +1,33 @@
-package collector
+package pipeline
 
 import (
 	"context"
 
-	"github.com/pagarme/warp-pipe/pipeline/message"
 	"github.com/pkg/errors"
 )
 
 // Collector interface
 type Collector interface {
 	Init(ctx context.Context) (err error)
-	Collect(publishCh chan<- message.Message)
+	Collect(publishCh chan<- Message)
 	UpdateOffset(updateOffsetCh <-chan uint64)
 }
 
-// Run collector
-func Run(ctx context.Context, c Collector) (publishCh <-chan message.Message, offsetCh chan<- uint64, err error) {
+// Runner pipeline stages
+type Runner func() (name string)
+
+// NewRunner create a new runner func
+func NewRunner(name string) Runner {
+	return Runner(func() string {
+		return name
+	})
+}
+
+// Collector runner
+func (r Runner) Collector(ctx context.Context, c Collector) (outCh <-chan Message, offsetCh chan<- uint64, err error) {
 
 	var (
-		publish = make(chan message.Message)
+		publish = make(chan Message)
 		offset  = make(chan uint64)
 	)
 

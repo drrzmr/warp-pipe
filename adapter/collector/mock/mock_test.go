@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/pagarme/warp-pipe/adapter/collector/mock"
-	"github.com/pagarme/warp-pipe/pipeline/message"
+	"github.com/pagarme/warp-pipe/pipeline"
 )
 
 func TestMockCollector(t *testing.T) {
 
-	collect := func(messageID uint64, publishCh chan<- message.Message) (end bool) {
+	collect := func(messageID uint64, publishCh chan<- pipeline.Message) (end bool) {
 
-		publishCh <- message.New(message.Payload{
+		publishCh <- pipeline.NewMessage(pipeline.Payload{
 			"data": messageID,
 		})
 		fmt.Println("send message, messageID:", messageID)
@@ -27,7 +27,7 @@ func TestMockCollector(t *testing.T) {
 
 	var (
 		collector = mock.New(10, collect, updateOffset)
-		publishCh = make(chan message.Message)
+		publishCh = make(chan pipeline.Message)
 		offsetCh  = make(chan uint64)
 		ctx       = context.Background()
 	)
@@ -36,7 +36,7 @@ func TestMockCollector(t *testing.T) {
 	go collector.Collect(publishCh)
 	go collector.UpdateOffset(offsetCh)
 
-	func(publishCh <-chan message.Message, offsetCh chan<- uint64) {
+	func(publishCh <-chan pipeline.Message, offsetCh chan<- uint64) {
 		defer close(offsetCh)
 
 		for msg := range publishCh {
