@@ -13,7 +13,9 @@ type mockEventHandler struct {
 	EventHandler
 }
 
-var logger = log.Development("handler")
+var logger *zap.Logger
+
+func init() { log.Register(&logger, "lib.postgres.replicate.stream.handler") }
 
 // MockEventHandler mock event handler
 var MockEventHandler = &mockEventHandler{}

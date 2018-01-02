@@ -10,11 +10,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
+	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream/handler"
 	postgresTester "github.com/pagarme/warp-pipe/lib/tester/postgres"
 )
+
+func init() { log.Setup(log.Test) }
 
 func TestIntegrationStreamReplicate(t *testing.T) {
 	if testing.Short() {

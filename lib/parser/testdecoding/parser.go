@@ -37,7 +37,9 @@ type Operation struct {
 	Value  string
 }
 
-var logger = log.Development("parser")
+var logger *zap.Logger
+
+func init() { log.Register(&logger, "lib.parser.testdecoding") }
 
 // NewParser return a new parser struct
 func NewParser(transactionFunc TransactionFunc) *Parser {

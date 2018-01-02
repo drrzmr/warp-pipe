@@ -7,10 +7,13 @@ import (
 	"time"
 
 	"github.com/pagarme/warp-pipe/adapter/collector/postgres"
+	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate"
 	tester "github.com/pagarme/warp-pipe/lib/tester/postgres"
 	"github.com/pagarme/warp-pipe/pipeline/message"
 )
+
+func init() { log.Setup(log.Test) }
 
 func TestIntegrationPostgresAdapter(t *testing.T) {
 	if testing.Short() {

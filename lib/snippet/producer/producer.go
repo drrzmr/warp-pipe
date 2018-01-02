@@ -8,7 +8,9 @@ import (
 	"go.uber.org/zap"
 )
 
-var logger = log.Development("producer")
+var logger *zap.Logger
+
+func init() { log.Register(&logger, "lib.snippet.producer") }
 
 // Run kafka producer
 func Run() (err error) {

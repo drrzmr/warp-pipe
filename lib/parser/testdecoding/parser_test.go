@@ -7,10 +7,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
+	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/parser/testdecoding"
 	"github.com/pagarme/warp-pipe/lib/tester/file"
 )
 
+func init() { log.Setup(log.Test) }
 func TestParser(t *testing.T) {
 
 	var testTable []struct {

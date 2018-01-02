@@ -3,13 +3,17 @@ package log_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
 	"github.com/pagarme/warp-pipe/lib/log"
 )
 
+var logger *zap.Logger
+
+func init() { log.Register(&logger, "test") }
+
 func TestLogDevelopment(t *testing.T) {
 
-	logger := log.Development("log")
-	require.NotNil(t, logger)
+	log.Setup(log.Default)
+	logger.Debug("test debug message")
 }

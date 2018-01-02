@@ -9,11 +9,14 @@ import (
 	"github.com/jackc/pgx"
 
 	postgresCollector "github.com/pagarme/warp-pipe/adapter/collector/postgres"
+	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate"
 	postgresTester "github.com/pagarme/warp-pipe/lib/tester/postgres"
 	"github.com/pagarme/warp-pipe/pipeline/collector"
 	"github.com/stretchr/testify/require"
 )
+
+func init() { log.Setup(log.Test) }
 
 func TestIntegrationPostgresCollector(t *testing.T) {
 	if testing.Short() {

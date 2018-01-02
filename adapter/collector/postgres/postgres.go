@@ -22,7 +22,9 @@ type Collector struct {
 	ctx    context.Context
 }
 
-var logger = log.Development("collector")
+var logger *zap.Logger
+
+func init() { log.Register(&logger, "adapter.collector.postgres") }
 
 // New create a new collector
 func New(postgresConfig postgres.Config) *Collector {

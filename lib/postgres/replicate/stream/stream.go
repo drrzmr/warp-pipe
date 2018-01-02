@@ -17,7 +17,9 @@ const (
 	timeLine   = int64(-1)
 )
 
-var logger = log.Development("stream")
+var logger *zap.Logger
+
+func init() { log.Register(&logger, "lib.postgres.replicate.stream") }
 
 // Stream object
 type Stream struct {
