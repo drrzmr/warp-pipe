@@ -1,0 +1,12 @@
+DROP DATABASE IF EXISTS testdb;
+CREATE DATABASE testdb;
+
+\connect testdb
+
+CREATE TABLE test
+(
+	id SERIAL,
+	name VARCHAR(30),
+	ts TIMESTAMP NOT NULL,
+	PRIMARY KEY(id)
+);
