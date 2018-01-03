@@ -2,6 +2,7 @@ package pipeline_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -55,6 +56,67 @@ func TestCollector(t *testing.T) {
 		expectedMessageData++
 
 		offsetCh <- data
+	}
+
+	require.Equal(t, numberOfMessages, expectedMessageData)
+}
+
+/*************
+ * Processor *
+ *************/
+type processor struct {
+	pipeline.Processor
+	t    *testing.T
+	inCh <-chan pipeline.Message
+}
+
+func (p *processor) Init(ctx context.Context, inCh <-chan pipeline.Message) (err error) {
+	p.inCh = inCh
+	return nil
+}
+
+func (p *processor) Process(outCh chan<- pipeline.Message) {
+	defer close(outCh)
+
+	for msg := range p.inCh {
+
+		var (
+			rawData       = msg.Get("rawData").(uint64)
+			processedData = rawData * 10
+		)
+
+		fmt.Printf("[processor] rawData: %d, processedData: %d\n", rawData, processedData)
+
+		outCh <- pipeline.NewMessage(pipeline.Payload{
+			"processedData": processedData,
+		})
+	}
+}
+
+func TestProcessor(t *testing.T) {
+
+	mockInCh := make(chan pipeline.Message)
+	go func(outCh chan<- pipeline.Message) {
+		defer close(outCh)
+		for i := uint64(0); i < numberOfMessages; i++ {
+			fmt.Println("[mock producer] rawData:", i)
+			outCh <- pipeline.NewMessage(pipeline.Payload{
+				"rawData": i,
+			})
+		}
+	}(mockInCh)
+
+	run := pipeline.NewRunner("test")
+	outCh, err := run.Processor(context.Background(), &processor{t: t}, mockInCh)
+	require.NoError(t, err)
+
+	expectedMessageData := uint64(0)
+	for msg := range outCh {
+		processedData := msg.Get("processedData").(uint64)
+		fmt.Println("[mock consumer] processedData:", processedData)
+
+		require.Equal(t, expectedMessageData*10, processedData)
+		expectedMessageData++
 	}
 
 	require.Equal(t, numberOfMessages, expectedMessageData)
