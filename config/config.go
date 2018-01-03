@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/viper"
 	yaml "gopkg.in/yaml.v2"
 
+	"github.com/pagarme/warp-pipe/config/cmd"
 	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres"
 	"github.com/pagarme/warp-pipe/lib/snippet/reader"
@@ -19,6 +20,7 @@ import (
 type Config struct {
 	Reader   reader.Config
 	Log      log.Config
+	Cmd      cmd.Config
 	Postgres postgres.Config
 }
 
@@ -53,6 +55,12 @@ var Default = &Config{
 	Log: log.Config{
 		Stdout: "stdout",
 		Stderr: "stderr",
+	},
+	Cmd: cmd.Config{
+		Dump: cmd.DumpConfig{
+			InputNamedPipe: "input.pipe",
+			Stdout:         "stdout",
+		},
 	},
 	Postgres: postgres.Config{
 		Host:     "postgres",
