@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pagarme/warp-pipe/config"
+	"github.com/pagarme/warp-pipe/lib/snippet/reader"
 )
 
 func Test_CmdReader(t *testing.T) {
@@ -28,7 +28,7 @@ func Test_CmdReader(t *testing.T) {
 
 	text := "testing...\n"
 
-	confReader := &config.Reader{
+	confReader := &reader.Config{
 		InputStream:  sr,
 		OutputStream: rw,
 	}
