@@ -1,6 +1,7 @@
 package mock_test
 
 import (
+	"context"
 	"testing"
 
 	"go.uber.org/zap"
@@ -32,9 +33,10 @@ func TestMockCollector(t *testing.T) {
 		collector = mock.New(10, collect, updateOffset)
 		publishCh = make(chan message.Message)
 		offsetCh  = make(chan uint64)
+		ctx       = context.Background()
 	)
 
-	collector.Init()
+	collector.Init(ctx)
 	go collector.Collect(publishCh)
 	go collector.UpdateOffset(offsetCh)
 

@@ -1,6 +1,8 @@
 package mock
 
 import (
+	"context"
+
 	"github.com/pagarme/warp-pipe/pipeline/collector"
 	"github.com/pagarme/warp-pipe/pipeline/message"
 )
@@ -28,7 +30,7 @@ func New(numberOfMessages uint64, collectCb collectFunc, updateOffsetCb updateOf
 }
 
 // Init implements method from interface
-func (c *Collector) Init() (err error) { return nil }
+func (c *Collector) Init(ctx context.Context) (err error) { return nil }
 
 // Collect implements method from interface
 func (c *Collector) Collect(publishCh chan<- message.Message) {

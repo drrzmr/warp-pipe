@@ -1,8 +1,11 @@
 package postgres
 
 import (
+	"context"
 	"time"
 
+	"github.com/pagarme/warp-pipe/adapter/collector/postgres/handler"
+	"github.com/pagarme/warp-pipe/lib/postgres"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -16,28 +19,42 @@ import (
 type Collector struct {
 	collector.Collector
 	stream *stream.Stream
+	ctx    context.Context
 }
 
 var logger = log.Development("collector")
 
 // New create a new collector
-func New(stream *stream.Stream) *Collector {
+func New(postgresConfig postgres.Config) *Collector {
 
 	return &Collector{
-		stream: stream,
+		stream: stream.New(postgresConfig),
 	}
 }
 
 // Init method
-func (c *Collector) Init() (err error) {
+func (c *Collector) Init(ctx context.Context) (err error) {
 
 	logger.Debug("--> Init()")
 	defer logger.Debug("<-- Init()")
 
-	err = c.stream.Connect()
-	logger.ErrorIf(err != nil, "stream connect error", zap.Error(err))
+	if c.isInitialized() {
+		logger.Warn("already initialized")
+		return nil
+	}
 
-	return errors.WithStack(err)
+	if err = c.stream.Connect(); err != nil {
+		logger.Error("stream connect error", zap.Error(err))
+		return errors.WithStack(err)
+	}
+
+	if err = c.stream.Start(); err != nil {
+		logger.Error("stream start error", zap.Error(err))
+		return errors.WithStack(err)
+	}
+
+	c.ctx = ctx
+	return nil
 }
 
 // Collect method
@@ -47,6 +64,14 @@ func (c *Collector) Collect(publishCh chan<- message.Message) {
 	defer logger.Debug("<-- Collect()")
 
 	defer close(publishCh)
+
+	var (
+		handler  = handler.New(publishCh)
+		listener = c.stream.NewDefaultEventListener(handler)
+	)
+
+	err := listener.Listen(c.ctx)
+	logger.Info("<-- Collect()", zap.Error(err))
 }
 
 // UpdateOffset method
@@ -74,8 +99,14 @@ func (c *Collector) UpdateOffset(offsetCh <-chan uint64) {
 				offset = newOffset
 			}
 
+		case <-c.ctx.Done():
+			logger.Info("canceled, exiting...", zap.Error(c.ctx.Err()))
+			return
+
 		case <-ticker.C:
 			c.stream.SendStandByStatus(offset)
 		}
 	}
 }
+
+func (c *Collector) isInitialized() (initialized bool) { return c.ctx != nil }

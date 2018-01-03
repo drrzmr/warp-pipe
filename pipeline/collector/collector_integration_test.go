@@ -1,16 +1,17 @@
 package collector_test
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/jackc/pgx"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/pagarme/warp-pipe/adapter/collector/postgres"
+	postgresCollector "github.com/pagarme/warp-pipe/adapter/collector/postgres"
 	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate"
-	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream"
 	postgresTester "github.com/pagarme/warp-pipe/lib/tester/postgres"
 	"github.com/pagarme/warp-pipe/pipeline/collector"
 )
@@ -43,7 +44,8 @@ CREATE TABLE test
 
 	t.Run("BuildStage", func(t *testing.T) {
 
-		publishCh, offsetCh, err := collector.Run(postgres.New(stream.New(postgresConfig)))
+		ctx, cancel := context.WithCancel(context.Background())
+		publishCh, offsetCh, err := collector.Run(ctx, postgresCollector.New(postgresConfig))
 		require.NoError(t, err)
 
 		_, err = normalDB.Exec("INSERT INTO test (name, ts) VALUES ('test1', now());")
@@ -53,6 +55,11 @@ CREATE TABLE test
 			done     = make(chan struct{})
 			commitCh = make(chan uint64)
 		)
+
+		time.AfterFunc(10*time.Second, func() {
+			logger.Debug("canceling...")
+			cancel()
+		})
 
 		go func() {
 			for msg := range publishCh {

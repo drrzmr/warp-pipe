@@ -1,6 +1,7 @@
 package collector_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -24,7 +25,7 @@ func newTestCollector(t *testing.T) *testCollector {
 	}
 }
 
-func (c *testCollector) Init() (err error) { return nil }
+func (c *testCollector) Init(ctx context.Context) (err error) { return nil }
 
 func (c *testCollector) Collect(publishCh chan<- message.Message) {
 	defer close(publishCh)
@@ -48,7 +49,8 @@ func (c *testCollector) UpdateOffset(offsetCh <-chan uint64) {
 
 func TestCollectorRun(t *testing.T) {
 
-	publishCh, offsetCh, err := collector.Run(newTestCollector(t))
+	ctx := context.Background()
+	publishCh, offsetCh, err := collector.Run(ctx, newTestCollector(t))
 	require.NoError(t, err)
 
 	expectedMessageData := uint64(0)
