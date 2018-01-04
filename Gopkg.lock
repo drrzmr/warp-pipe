@@ -27,18 +27,46 @@
 
 [[projects]]
   name = "github.com/docker/distribution"
-  packages = ["digestset","reference"]
+  packages = [
+    "digestset",
+    "reference"
+  ]
   revision = "b38e5838b7b2f2ad48e06ec4b500011976080621"
 
 [[projects]]
   name = "github.com/docker/docker"
-  packages = ["api","api/types","api/types/blkiodev","api/types/container","api/types/events","api/types/filters","api/types/image","api/types/mount","api/types/network","api/types/registry","api/types/strslice","api/types/swarm","api/types/time","api/types/versions","api/types/volume","client","pkg/ioutils","pkg/longpath","pkg/system","pkg/tlsconfig"]
+  packages = [
+    "api",
+    "api/types",
+    "api/types/blkiodev",
+    "api/types/container",
+    "api/types/events",
+    "api/types/filters",
+    "api/types/image",
+    "api/types/mount",
+    "api/types/network",
+    "api/types/registry",
+    "api/types/strslice",
+    "api/types/swarm",
+    "api/types/time",
+    "api/types/versions",
+    "api/types/volume",
+    "client",
+    "pkg/ioutils",
+    "pkg/longpath",
+    "pkg/system",
+    "pkg/tlsconfig"
+  ]
   revision = "89658bed64c2a8fe05a978e5b87dbec409d57a0f"
   version = "v17.05.0-ce"
 
 [[projects]]
   name = "github.com/docker/go-connections"
-  packages = ["nat","sockets","tlsconfig"]
+  packages = [
+    "nat",
+    "sockets",
+    "tlsconfig"
+  ]
   revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
   version = "v0.3.0"
 
@@ -87,7 +115,17 @@
 [[projects]]
   branch = "master"
   name = "github.com/hashicorp/hcl"
-  packages = [".","hcl/ast","hcl/parser","hcl/scanner","hcl/strconv","hcl/token","json/parser","json/scanner","json/token"]
+  packages = [
+    ".",
+    "hcl/ast",
+    "hcl/parser",
+    "hcl/scanner",
+    "hcl/strconv",
+    "hcl/token",
+    "json/parser",
+    "json/scanner",
+    "json/token"
+  ]
   revision = "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8"
 
 [[projects]]
@@ -98,14 +136,25 @@
 
 [[projects]]
   name = "github.com/jackc/pgx"
-  packages = [".","chunkreader","internal/sanitize","pgio","pgproto3","pgtype","stdlib"]
+  packages = [
+    ".",
+    "chunkreader",
+    "internal/sanitize",
+    "pgio",
+    "pgproto3",
+    "pgtype",
+    "stdlib"
+  ]
   revision = "66918e80dfde8d5cb09af9aebf40e2cce2eb0cc0"
   version = "v3.0.1"
 
 [[projects]]
   branch = "master"
   name = "github.com/jmoiron/sqlx"
-  packages = [".","reflectx"]
+  packages = [
+    ".",
+    "reflectx"
+  ]
   revision = "de8647470aafe4854c976707c431dbe1eb2822c6"
 
 [[projects]]
@@ -170,7 +219,10 @@
 
 [[projects]]
   name = "github.com/spf13/afero"
-  packages = [".","mem"]
+  packages = [
+    ".",
+    "mem"
+  ]
   revision = "ec3a3111d1e1bdff38a61e09d5a5f5e974905611"
   version = "v1.0.1"
 
@@ -206,7 +258,10 @@
 
 [[projects]]
   name = "github.com/stretchr/testify"
-  packages = ["assert","require"]
+  packages = [
+    "assert",
+    "require"
+  ]
   revision = "69483b4bd14f5845b5a1e55bca19e954e827f1d0"
   version = "v1.1.4"
 
@@ -224,7 +279,14 @@
 
 [[projects]]
   name = "go.uber.org/zap"
-  packages = [".","buffer","internal/bufferpool","internal/color","internal/exit","zapcore"]
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore"
+  ]
   revision = "35aad584952c3e7020db7b839f6b102de6271f89"
   version = "v1.7.1"
 
@@ -237,19 +299,33 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","context/ctxhttp","proxy"]
+  packages = [
+    "context",
+    "context/ctxhttp",
+    "proxy"
+  ]
   revision = "a8b9294777976932365dabb6640cf1468d95c70f"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix","windows"]
+  packages = [
+    "unix",
+    "windows"
+  ]
   revision = "13fcbd661c8ececa8807a29b48407d674b1d8ed8"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/text"
-  packages = ["internal/gen","internal/triegen","internal/ucd","transform","unicode/cldr","unicode/norm"]
+  packages = [
+    "internal/gen",
+    "internal/triegen",
+    "internal/ucd",
+    "transform",
+    "unicode/cldr",
+    "unicode/norm"
+  ]
   revision = "e19ae1496984b1c655b8044a65c0300a3c878dd3"
 
 [[projects]]
@@ -261,6 +337,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b7278963cd2ca7a16d639b667b9aff055fc3bb4ff1252a4520111732eed0ae29"
+  inputs-digest = "13e8e07a54e2d9d6e6439c8e390a18edba9a6e5b86838b1b10c6d203b671393a"
   solver-name = "gps-cdcl"
   solver-version = 1
