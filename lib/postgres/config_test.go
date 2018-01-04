@@ -18,7 +18,7 @@ func TestConfig(t *testing.T) {
 
 		SQL: postgres.SQLConfig{
 			Driver:         "pgx",
-			ConnectTimeout: postgres.MinConnectTimeout,
+			ConnectTimeout: postgres.DefaultConnectTimeout,
 		},
 	}
 

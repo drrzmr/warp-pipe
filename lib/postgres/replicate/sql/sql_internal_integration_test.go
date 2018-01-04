@@ -52,13 +52,15 @@ CREATE TABLE test
 	require.NoError(t, err)
 
 	t.Run("createSlot", func(t *testing.T) {
-		created, err := createSlot(db, slot, plugin)
+		var created bool
+		created, err = createSlot(db, slot, plugin)
 		require.NoError(t, err)
 		require.True(t, created)
 	})
 
 	t.Run("listSlots", func(t *testing.T) {
-		slots, err := listSlots(db)
+		var slots []SlotInfo
+		slots, err = listSlots(db)
 		require.NoError(t, err)
 		require.Len(t, slots, 1)
 		require.Equal(t, slot, slots[0].SlotName)
@@ -71,7 +73,8 @@ CREATE TABLE test
 	})
 
 	t.Run("getAllChanges", func(t *testing.T) {
-		changes, err := getAllChanges(db, slot)
+		var changes []ReplicationEvent
+		changes, err = getAllChanges(db, slot)
 		require.NoError(t, err)
 		require.Len(t, changes, 0)
 
@@ -103,7 +106,8 @@ CREATE TABLE test
 	})
 
 	t.Run("peekAllChanges", func(t *testing.T) {
-		changes, err := peekAllChanges(db, slot)
+		var changes []ReplicationEvent
+		changes, err = peekAllChanges(db, slot)
 		require.NoError(t, err)
 		require.Len(t, changes, 0)
 

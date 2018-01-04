@@ -36,12 +36,17 @@ func (d *DefaultEventListener) Listen(ctx context.Context) (err error) {
 	logger.Debug("--> Run()")
 	defer logger.Debug("<-- Run()")
 
+	var (
+		message *pgx.ReplicationMessage
+		ignore  bool
+	)
+
 	for {
 		runContext, cancel := context.WithTimeout(ctx, d.timeout)
-		message, err := d.conn.WaitForReplicationMessage(runContext)
+		message, err = d.conn.WaitForReplicationMessage(runContext)
 		cancel()
 
-		if ignore, err := filterError(message, d.handler, err); err != nil {
+		if ignore, err = filterError(message, d.handler, err); err != nil {
 			return errors.WithStack(err)
 		} else if ignore {
 			continue
