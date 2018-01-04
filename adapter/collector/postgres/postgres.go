@@ -4,20 +4,19 @@ import (
 	"context"
 	"time"
 
-	"github.com/pagarme/warp-pipe/adapter/collector/postgres/handler"
-	"github.com/pagarme/warp-pipe/lib/postgres"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"github.com/pagarme/warp-pipe/adapter/collector/postgres/handler"
 	"github.com/pagarme/warp-pipe/lib/log"
+	"github.com/pagarme/warp-pipe/lib/postgres"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream"
-	"github.com/pagarme/warp-pipe/pipeline/collector"
-	"github.com/pagarme/warp-pipe/pipeline/message"
+	"github.com/pagarme/warp-pipe/pipeline"
 )
 
 // Collector object
 type Collector struct {
-	collector.Collector
+	pipeline.Collector
 	stream *stream.Stream
 	ctx    context.Context
 }
@@ -60,7 +59,7 @@ func (c *Collector) Init(ctx context.Context) (err error) {
 }
 
 // Collect method
-func (c *Collector) Collect(publishCh chan<- message.Message) {
+func (c *Collector) Collect(publishCh chan<- pipeline.Message) {
 
 	logger.Debug("--> Collect()")
 	defer logger.Debug("<-- Collect()")

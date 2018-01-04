@@ -8,13 +8,13 @@ import (
 
 	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream/handler"
-	"github.com/pagarme/warp-pipe/pipeline/message"
+	"github.com/pagarme/warp-pipe/pipeline"
 )
 
 // Handler interface implementation
 type Handler struct {
 	handler.EventHandler
-	publishCh chan<- message.Message
+	publishCh chan<- pipeline.Message
 }
 
 var logger *zap.Logger
@@ -22,7 +22,7 @@ var logger *zap.Logger
 func init() { log.Register(&logger, "adapter.collector.postgres.handler") }
 
 // New create new handler
-func New(publishCh chan<- message.Message) handler.EventHandler {
+func New(publishCh chan<- pipeline.Message) handler.EventHandler {
 
 	return &Handler{
 		publishCh: publishCh,
@@ -47,7 +47,7 @@ func (h *Handler) Message(msg *pgx.WalMessage) {
 		zap.String("lsn", pgx.FormatLSN(msg.WalStart)),
 	)
 
-	h.publishCh <- message.New(message.Payload{
+	h.publishCh <- pipeline.NewMessage(pipeline.Payload{
 		"WalStart":     msg.WalStart,
 		"ServerWalEnd": msg.ServerWalEnd,
 		"WalData":      msg.WalData,
