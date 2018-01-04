@@ -1,4 +1,4 @@
-package reader
+package reader_test
 
 import (
 	"bytes"
@@ -7,9 +7,10 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	cmd "github.com/pagarme/warp-pipe/cmd/reader"
+	"github.com/pagarme/warp-pipe/lib/snippet/reader"
 
-	"github.com/pagarme/warp-pipe/config"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_CmdReader(t *testing.T) {
@@ -28,13 +29,13 @@ func Test_CmdReader(t *testing.T) {
 
 	text := "testing...\n"
 
-	confReader := &config.Reader{
+	confReader := &reader.Config{
 		InputStream:  sr,
 		OutputStream: rw,
 	}
 
 	buf := &bytes.Buffer{}
-	readerCmd := New(confReader)
+	readerCmd := cmd.New(confReader)
 	readerCmd.SetOutput(buf)
 	out := readerCmd.OutOrStdout()
 	require.Equal(t, buf, out)

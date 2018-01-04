@@ -1,12 +1,10 @@
 package main
 
-import (
-	"github.com/pagarme/warp-pipe/cmd"
-)
+import "github.com/pagarme/warp-pipe/cmd"
 
 func main() {
 
-	if err := cmd.Execute(); err != nil {
+	if err := cmd.New().Execute(); err != nil {
 		panic(err)
 	}
 }

@@ -1,13 +1,13 @@
 package reader
 
 import (
-	"github.com/pagarme/warp-pipe/config"
-	"github.com/pagarme/warp-pipe/lib/snippet/reader"
 	"github.com/spf13/cobra"
+
+	"github.com/pagarme/warp-pipe/lib/snippet/reader"
 )
 
 // New returns a reader command
-func New(configReader *config.Reader) *cobra.Command {
+func New(configReader *reader.Config) *cobra.Command {
 
 	return &cobra.Command{
 		Use:   "reader",
