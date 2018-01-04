@@ -1,21 +1,52 @@
 package log
 
 import (
+	"sync"
+
 	"go.uber.org/zap"
 )
 
-var development *zap.Logger
+type register struct {
+	name   string
+	logger **zap.Logger
+}
 
-func init() {
-	var err error
-	development, err = zap.NewDevelopment()
-	if err != nil {
-		panic(err)
+var (
+	mainLogger   *zap.Logger
+	registerList []register
+	once         sync.Once
+	zapConfig    = zap.NewDevelopmentConfig()
+)
+
+// Setup configure and create main logger
+func Setup(config Config) {
+
+	once.Do(func() {
+		zapConfig.OutputPaths = []string{config.Stdout}
+		zapConfig.ErrorOutputPaths = []string{config.Stderr}
+
+		var err error
+		if mainLogger, err = zapConfig.Build(); err != nil {
+			panic(err)
+		}
+
+		for _, r := range registerList {
+			*r.logger = mainLogger.Named(r.name)
+		}
+	})
+}
+
+// Register a logger with given name
+func Register(logger **zap.Logger, name string) {
+
+	registerList = append(registerList, register{
+		name:   name,
+		logger: logger,
+	})
+
+	if isSetuped() {
+		*logger = mainLogger.Named(name)
 	}
 }
 
-// Development return a child logger for given module
-func Development(module string) *zap.Logger {
-
-	return development.With(zap.String("module", module))
-}
+func isSetuped() (setuped bool) { return mainLogger != nil }

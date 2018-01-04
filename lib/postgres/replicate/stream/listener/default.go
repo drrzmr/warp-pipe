@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/pagarme/warp-pipe/lib/log"
 	"github.com/pagarme/warp-pipe/lib/postgres/replicate/stream/handler"
@@ -19,7 +20,9 @@ type DefaultEventListener struct {
 	timeout time.Duration
 }
 
-var logger = log.Development("listener")
+var logger *zap.Logger
+
+func init() { log.Register(&logger, "lib.postgres.replicate.stream.listener") }
 
 // NewDefaultEventListener simple event listener mock
 func NewDefaultEventListener(conn *pgx.ReplicationConn, timeout time.Duration, h handler.EventHandler) EventListener {

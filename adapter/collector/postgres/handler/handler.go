@@ -17,7 +17,9 @@ type Handler struct {
 	publishCh chan<- message.Message
 }
 
-var logger = log.Development("handler")
+var logger *zap.Logger
+
+func init() { log.Register(&logger, "adapter.collector.postgres.handler") }
 
 // New create new handler
 func New(publishCh chan<- message.Message) handler.EventHandler {

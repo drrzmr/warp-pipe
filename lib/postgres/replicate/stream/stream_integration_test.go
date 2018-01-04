@@ -2,6 +2,7 @@ package stream_test
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"testing"
 	"time"
@@ -16,7 +17,7 @@ import (
 	postgresTester "github.com/pagarme/warp-pipe/lib/tester/postgres"
 )
 
-var logger = log.Development("test")
+func init() { log.Setup(log.Test) }
 
 func TestIntegrationStreamReplicate(t *testing.T) {
 	if testing.Short() {
@@ -54,8 +55,8 @@ func TestIntegrationStreamReplicate(t *testing.T) {
 
 		ctx, cancel := context.WithCancel(context.Background())
 		time.AfterFunc(10*time.Second, func() {
-			logger.Debug("canceling...")
-			defer logger.Debug("cancel done")
+			fmt.Println("canceling...")
+			defer fmt.Println("cancel done")
 
 			cancel()
 		})
